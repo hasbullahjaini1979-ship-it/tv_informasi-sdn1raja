@@ -1,0 +1,1762 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TV Informasi Digital Sekolah</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Exo+2:wght@300;400;600;700&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary: #0a1628;
+    --secondary: #0d2137;
+    --accent: #00d4ff;
+    --accent2: #ff6b00;
+    --accent3: #00ff9d;
+    --gold: #ffd700;
+    --text: #e8f4fd;
+    --panel-bg: rgba(0, 212, 255, 0.06);
+    --border: rgba(0, 212, 255, 0.25);
+    --glow: 0 0 20px rgba(0, 212, 255, 0.4);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Exo 2', sans-serif;
+    background: var(--primary);
+    color: var(--text);
+    overflow: hidden;
+    height: 100vh;
+    width: 100vw;
+  }
+
+  /* ===== LAYAR UTAMA ===== */
+  #tv-display {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    width: 100vw;
+    background: radial-gradient(ellipse at 20% 50%, #0d2137 0%, #050e1a 60%, #000 100%);
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Background grid */
+  #tv-display::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: 
+      linear-gradient(rgba(0,212,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,212,255,0.03) 1px, transparent 1px);
+    background-size: 50px 50px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* Corner decorations */
+  .corner { position: absolute; width: 60px; height: 60px; z-index: 2; }
+  .corner-tl { top: 4px; left: 4px; border-top: 2px solid var(--accent); border-left: 2px solid var(--accent); }
+  .corner-tr { top: 4px; right: 4px; border-top: 2px solid var(--accent); border-right: 2px solid var(--accent); }
+  .corner-bl { bottom: 44px; left: 4px; border-bottom: 2px solid var(--accent); border-left: 2px solid var(--accent); }
+  .corner-br { bottom: 44px; right: 4px; border-bottom: 2px solid var(--accent); border-right: 2px solid var(--accent); }
+
+  /* ===== RUNNING TEXT TOP ===== */
+  .running-text-bar {
+    position: relative;
+    z-index: 10;
+    background: linear-gradient(90deg, #001a2e, #003352, #001a2e);
+    border-bottom: 1px solid var(--accent);
+    border-top: 2px solid var(--accent);
+    padding: 6px 0;
+    overflow: hidden;
+    flex-shrink: 0;
+    box-shadow: 0 2px 20px rgba(0,212,255,0.3);
+  }
+
+  .running-text-bar.bottom {
+    border-top: 1px solid var(--accent2);
+    border-bottom: 2px solid var(--accent2);
+    background: linear-gradient(90deg, #1a0f00, #2d1a00, #1a0f00);
+    box-shadow: 0 -2px 20px rgba(255,107,0,0.3);
+  }
+
+  .ticker-label {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+    background: var(--accent);
+    color: var(--primary);
+    font-family: 'Orbitron', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    z-index: 2;
+    white-space: nowrap;
+  }
+
+  .running-text-bar.bottom .ticker-label {
+    background: var(--accent2);
+  }
+
+  .ticker-wrap {
+    overflow: hidden;
+    padding-left: 120px;
+  }
+
+  .ticker-text {
+    display: inline-block;
+    white-space: nowrap;
+    animation: ticker 25s linear infinite;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    color: #fff;
+    letter-spacing: 0.5px;
+  }
+
+  .running-text-bar.bottom .ticker-text {
+    color: #ffe0b0;
+    animation-duration: 30s;
+    animation-direction: normal;
+  }
+
+  @keyframes ticker {
+    0% { transform: translateX(100vw); }
+    100% { transform: translateX(-100%); }
+  }
+
+  /* ===== MAIN CONTENT AREA ===== */
+  .main-content {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    grid-template-rows: auto 1fr;
+    gap: 10px;
+    padding: 10px 14px;
+    position: relative;
+    z-index: 1;
+    min-height: 0;
+  }
+
+  /* ===== HEADER - Logo & Nama Sekolah ===== */
+  .school-header {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--panel-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 20px;
+    backdrop-filter: blur(10px);
+    flex-shrink: 0;
+  }
+
+  .school-identity {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .school-logo {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    border: 2px solid var(--accent);
+    box-shadow: var(--glow);
+    object-fit: cover;
+    background: rgba(0,212,255,0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 30px;
+    overflow: hidden;
+    position: relative;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  .school-logo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: none;
+  }
+
+  .school-logo .logo-placeholder {
+    font-size: 32px;
+    filter: drop-shadow(0 0 6px var(--accent));
+  }
+
+  .school-name h1 {
+    font-family: 'Orbitron', monospace;
+    font-size: 18px;
+    font-weight: 900;
+    color: var(--accent);
+    text-shadow: 0 0 15px rgba(0,212,255,0.5);
+    letter-spacing: 1px;
+    line-height: 1.2;
+  }
+
+  .school-name p {
+    font-size: 12px;
+    color: rgba(255,255,255,0.6);
+    font-family: 'Rajdhani', sans-serif;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  /* ===== CLOCK ===== */
+  .clock-widget {
+    text-align: right;
+  }
+
+  .clock-time {
+    font-family: 'Orbitron', monospace;
+    font-size: 40px;
+    font-weight: 700;
+    color: var(--accent);
+    text-shadow: 0 0 20px rgba(0,212,255,0.6);
+    line-height: 1;
+    letter-spacing: 3px;
+  }
+
+  .clock-date {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 14px;
+    color: var(--gold);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+
+  .clock-day {
+    font-family: 'Exo 2', sans-serif;
+    font-size: 11px;
+    color: rgba(255,255,255,0.5);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  /* ===== MEDIA AREA (kiri bawah) ===== */
+  .media-panel {
+    background: #000;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    position: relative;
+    min-height: 0;
+  }
+
+  .media-panel-label {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    z-index: 5;
+    background: rgba(0,0,0,0.7);
+    border: 1px solid var(--accent);
+    border-radius: 4px;
+    padding: 3px 10px;
+    font-family: 'Orbitron', monospace;
+    font-size: 9px;
+    color: var(--accent);
+    letter-spacing: 1.5px;
+  }
+
+  /* SLIDESHOW */
+  #slideshow-container {
+    width: 100%;
+    height: 100%;
+    position: relative;
+  }
+
+  .slide {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: opacity 1s ease-in-out;
+    background: #111;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .slide.active { opacity: 1; }
+
+  .slide img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .slide-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    color: rgba(255,255,255,0.3);
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 18px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    height: 100%;
+  }
+
+  .slide-placeholder span { font-size: 48px; }
+
+  .slide-dots {
+    position: absolute;
+    bottom: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 6px;
+    z-index: 5;
+  }
+
+  .dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.3);
+    transition: all 0.3s;
+    cursor: pointer;
+  }
+  .dot.active { background: var(--accent); box-shadow: 0 0 8px var(--accent); }
+
+  /* VIDEO */
+  #video-container {
+    width: 100%;
+    height: 100%;
+    display: none;
+  }
+
+  #video-container video {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    background: #000;
+  }
+
+  /* Media mode toggle */
+  .media-mode-indicator {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 5;
+    display: flex;
+    gap: 5px;
+  }
+
+  .mode-badge {
+    padding: 2px 8px;
+    border-radius: 3px;
+    font-family: 'Orbitron', monospace;
+    font-size: 8px;
+    letter-spacing: 1px;
+    opacity: 0.5;
+  }
+  .mode-badge.active-mode { opacity: 1; background: var(--accent); color: var(--primary); }
+
+  /* ===== SIDEBAR KANAN ===== */
+  .sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-height: 0;
+  }
+
+  /* GURU PIKET */
+  .guru-panel {
+    background: var(--panel-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px;
+    backdrop-filter: blur(10px);
+    flex-shrink: 0;
+  }
+
+  .panel-title {
+    font-family: 'Orbitron', monospace;
+    font-size: 9px;
+    color: var(--accent);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .panel-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, var(--accent), transparent);
+  }
+
+  .guru-display {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .guru-photo {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    border: 2px solid var(--accent3);
+    box-shadow: 0 0 15px rgba(0,255,157,0.3);
+    object-fit: cover;
+    background: rgba(0,255,157,0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 36px;
+    flex-shrink: 0;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .guru-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: none;
+  }
+
+  .guru-info h3 {
+    font-family: 'Exo 2', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    color: #fff;
+    line-height: 1.2;
+    margin-bottom: 4px;
+  }
+
+  .guru-info .guru-role {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 11px;
+    color: var(--accent3);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+  }
+
+  .guru-day-badge {
+    display: inline-block;
+    background: rgba(0,255,157,0.15);
+    border: 1px solid rgba(0,255,157,0.3);
+    border-radius: 4px;
+    padding: 2px 8px;
+    font-size: 10px;
+    color: var(--accent3);
+    margin-top: 6px;
+    font-family: 'Rajdhani', sans-serif;
+    letter-spacing: 1px;
+  }
+
+  /* INFO PANELS */
+  .info-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+
+  .stat-card {
+    background: var(--panel-bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 10px;
+    text-align: center;
+    backdrop-filter: blur(10px);
+  }
+
+  .stat-card .stat-num {
+    font-family: 'Orbitron', monospace;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--gold);
+    text-shadow: 0 0 10px rgba(255,215,0,0.4);
+    line-height: 1;
+  }
+
+  .stat-card .stat-label {
+    font-size: 9px;
+    color: rgba(255,255,255,0.5);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-top: 3px;
+    font-family: 'Rajdhani', sans-serif;
+  }
+
+  /* PENGUMUMAN */
+  .announce-panel {
+    background: var(--panel-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px;
+    flex: 1;
+    overflow: hidden;
+    backdrop-filter: blur(10px);
+    min-height: 0;
+  }
+
+  .announce-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    overflow-y: auto;
+    max-height: 160px;
+  }
+
+  .announce-list::-webkit-scrollbar { width: 3px; }
+  .announce-list::-webkit-scrollbar-track { background: transparent; }
+  .announce-list::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 2px; }
+
+  .announce-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 8px 10px;
+    background: rgba(0,0,0,0.3);
+    border-left: 2px solid var(--accent2);
+    border-radius: 0 4px 4px 0;
+    font-size: 12px;
+    font-family: 'Rajdhani', sans-serif;
+    color: rgba(255,255,255,0.8);
+    line-height: 1.4;
+  }
+
+  .announce-icon { color: var(--accent2); flex-shrink: 0; font-size: 10px; margin-top: 2px; }
+
+  /* ===== ADMIN PANEL ===== */
+  #admin-panel {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    background: rgba(0,5,15,0.97);
+    overflow-y: auto;
+    padding: 20px;
+    backdrop-filter: blur(20px);
+  }
+
+  .admin-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .admin-title {
+    font-family: 'Orbitron', monospace;
+    font-size: 22px;
+    font-weight: 900;
+    color: var(--accent);
+    text-shadow: var(--glow);
+    letter-spacing: 2px;
+  }
+
+  .btn-close-admin {
+    background: rgba(255,107,0,0.15);
+    border: 1px solid var(--accent2);
+    color: var(--accent2);
+    padding: 8px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: 'Orbitron', monospace;
+    font-size: 11px;
+    letter-spacing: 1px;
+    transition: all 0.2s;
+  }
+
+  .btn-close-admin:hover {
+    background: var(--accent2);
+    color: #fff;
+  }
+
+  .admin-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+
+  .admin-section {
+    background: rgba(0,212,255,0.04);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+  }
+
+  .admin-section.full-width {
+    grid-column: 1 / -1;
+  }
+
+  .admin-section-title {
+    font-family: 'Orbitron', monospace;
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .form-group { margin-bottom: 14px; }
+
+  label {
+    display: block;
+    font-size: 11px;
+    color: rgba(255,255,255,0.6);
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 600;
+  }
+
+  input[type="text"], input[type="file"], textarea, select {
+    width: 100%;
+    background: rgba(0,0,0,0.4);
+    border: 1px solid rgba(0,212,255,0.2);
+    color: #fff;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-family: 'Exo 2', sans-serif;
+    font-size: 13px;
+    transition: all 0.2s;
+    outline: none;
+  }
+
+  input:focus, textarea:focus, select:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 10px rgba(0,212,255,0.2);
+  }
+
+  textarea { resize: vertical; min-height: 70px; }
+
+  select option { background: #0a1628; }
+
+  .btn {
+    padding: 8px 18px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: 'Orbitron', monospace;
+    font-size: 10px;
+    letter-spacing: 1px;
+    border: none;
+    transition: all 0.2s;
+    text-transform: uppercase;
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: var(--primary);
+    font-weight: 700;
+  }
+
+  .btn-primary:hover { box-shadow: var(--glow); transform: translateY(-1px); }
+
+  .btn-danger {
+    background: rgba(255,60,60,0.2);
+    border: 1px solid rgba(255,60,60,0.4);
+    color: #ff6060;
+  }
+
+  .btn-danger:hover { background: rgba(255,60,60,0.4); }
+
+  .btn-success {
+    background: rgba(0,255,157,0.2);
+    border: 1px solid rgba(0,255,157,0.4);
+    color: var(--accent3);
+  }
+
+  .btn-success:hover { background: rgba(0,255,157,0.35); }
+
+  /* Guru piket table */
+  .guru-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+  }
+
+  .guru-table th {
+    text-align: left;
+    padding: 8px 10px;
+    font-family: 'Orbitron', monospace;
+    font-size: 9px;
+    color: var(--accent);
+    letter-spacing: 1px;
+    border-bottom: 1px solid var(--border);
+    background: rgba(0,212,255,0.05);
+  }
+
+  .guru-table td {
+    padding: 8px 10px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    vertical-align: middle;
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 600;
+  }
+
+  .guru-table tr:hover td { background: rgba(0,212,255,0.05); }
+
+  .guru-thumb {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    border: 1px solid var(--accent3);
+    object-fit: cover;
+    background: rgba(0,255,157,0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    overflow: hidden;
+  }
+
+  .guru-thumb img { width: 100%; height: 100%; object-fit: cover; display: none; }
+
+  .photo-preview {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 6px;
+  }
+
+  .photo-preview img {
+    width: 50px; height: 50px;
+    border-radius: 6px;
+    object-fit: cover;
+    border: 1px solid var(--border);
+    display: none;
+  }
+
+  .media-list { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+  .media-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    background: rgba(0,0,0,0.3);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 12px;
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 600;
+  }
+
+  .media-item-name { display: flex; align-items: center; gap: 8px; }
+  .media-type-badge {
+    font-size: 9px;
+    padding: 2px 6px;
+    border-radius: 3px;
+    background: rgba(0,212,255,0.15);
+    color: var(--accent);
+    font-family: 'Orbitron', monospace;
+    letter-spacing: 1px;
+  }
+
+  .admin-btn-bar {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+    flex-wrap: wrap;
+  }
+
+  /* Toast notification */
+  .toast {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    background: rgba(0,255,157,0.15);
+    border: 1px solid var(--accent3);
+    color: var(--accent3);
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-family: 'Orbitron', monospace;
+    font-size: 11px;
+    letter-spacing: 1px;
+    z-index: 999;
+    transform: translateY(80px);
+    opacity: 0;
+    transition: all 0.3s;
+  }
+
+  .toast.show { transform: translateY(0); opacity: 1; }
+
+  /* Admin button floating */
+  #btn-admin {
+    position: fixed;
+    bottom: 14px;
+    right: 14px;
+    z-index: 50;
+    background: rgba(0,212,255,0.1);
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    transition: all 0.3s;
+    backdrop-filter: blur(10px);
+  }
+
+  #btn-admin:hover {
+    background: var(--accent);
+    color: var(--primary);
+    box-shadow: var(--glow);
+  }
+
+  /* Input logo preview */
+  #logo-preview-img {
+    width: 70px; height: 70px;
+    border-radius: 50%;
+    border: 2px solid var(--accent);
+    object-fit: cover;
+    display: none;
+    margin-top: 8px;
+  }
+
+  /* Scan line effect */
+  #tv-display::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,0.03) 2px,
+      rgba(0,0,0,0.03) 4px
+    );
+    pointer-events: none;
+    z-index: 3;
+  }
+
+  /* Pulse animation for live indicator */
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+  .live-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: #ff4444;
+    animation: pulse 1.5s infinite;
+    display: inline-block;
+    margin-right: 4px;
+  }
+
+  /* Blink colon */
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+  .blink { animation: blink 1s infinite; }
+
+  /* Announce scroll animation */
+  @keyframes slideAnnounce {
+    0% { transform: translateY(100%); opacity: 0; }
+    10% { transform: translateY(0); opacity: 1; }
+    90% { transform: translateY(0); opacity: 1; }
+    100% { transform: translateY(-100%); opacity: 0; }
+  }
+
+  input[type="file"] { padding: 6px; cursor: pointer; }
+  input[type="file"]::-webkit-file-upload-button {
+    background: rgba(0,212,255,0.15);
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    padding: 4px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: 'Exo 2', sans-serif;
+    font-size: 11px;
+    margin-right: 8px;
+  }
+
+  .color-dot { width:12px;height:12px;border-radius:50%;display:inline-block;margin-right:6px; }
+
+  /* Responsive adjustments for smaller screens */
+  @media (max-height: 600px) {
+    .clock-time { font-size: 28px; }
+    .guru-photo { width: 60px; height: 60px; }
+    .school-logo { width: 55px; height: 55px; }
+    .announce-list { max-height: 100px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ============= TV DISPLAY ============= -->
+<div id="tv-display">
+  <!-- Corner decorations -->
+  <div class="corner corner-tl"></div>
+  <div class="corner corner-tr"></div>
+  <div class="corner corner-bl"></div>
+  <div class="corner corner-br"></div>
+
+  <!-- Running text TOP -->
+  <div class="running-text-bar" id="bar-top">
+    <div class="ticker-label">📢 INFO</div>
+    <div class="ticker-wrap">
+      <div class="ticker-text" id="ticker-top-text">Selamat Datang di Sistem Informasi Digital Sekolah ✦ Semangat Belajar dan Berprestasi ✦ Jadikan Setiap Hari Sebagai Kesempatan Meraih Prestasi Terbaik ✦</div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main-content">
+
+    <!-- School Header -->
+    <div class="school-header">
+      <div class="school-identity">
+        <div class="school-logo" id="logo-display">
+          <img id="logo-img" src="" alt="Logo">
+          <div class="logo-placeholder" id="logo-emoji">🏫</div>
+        </div>
+        <div class="school-name">
+          <h1 id="school-name-display">SMA NEGERI 1 CONTOH</h1>
+          <p id="school-tagline-display">Unggul · Berkarakter · Berprestasi</p>
+        </div>
+      </div>
+      <div class="clock-widget">
+        <div class="clock-time" id="clock-time">00<span class="blink">:</span>00<span class="blink">:</span>00</div>
+        <div class="clock-date" id="clock-date">Senin, 01 Januari 2025</div>
+        <div class="clock-day" id="clock-day">Hari Senin</div>
+      </div>
+    </div>
+
+    <!-- Media Panel (Kiri) -->
+    <div class="media-panel">
+      <div class="media-panel-label"><span class="live-dot"></span>LIVE BROADCAST</div>
+      <div class="media-mode-indicator">
+        <span class="mode-badge" id="badge-slide">SLIDESHOW</span>
+        <span class="mode-badge" id="badge-video">VIDEO</span>
+      </div>
+      
+      <!-- Slideshow -->
+      <div id="slideshow-container">
+        <div class="slide active" id="slide-0">
+          <div class="slide-placeholder">
+            <span>🖼️</span>
+            <div>Tambahkan Foto di Menu Admin</div>
+          </div>
+        </div>
+        <div class="slide-dots" id="slide-dots"></div>
+      </div>
+
+      <!-- Video -->
+      <div id="video-container">
+        <video id="main-video" controls autoplay muted loop>
+          <source id="video-source" src="" type="video/mp4">
+        </video>
+      </div>
+    </div>
+
+    <!-- Sidebar (Kanan) -->
+    <div class="sidebar">
+
+      <!-- Guru Piket -->
+      <div class="guru-panel">
+        <div class="panel-title">👨‍🏫 Guru Piket Hari Ini</div>
+        <div class="guru-display">
+          <div class="guru-photo" id="guru-photo-display">
+            <img id="guru-photo-img" src="" alt="">
+            <div id="guru-photo-emoji">👤</div>
+          </div>
+          <div class="guru-info">
+            <h3 id="guru-name-display">Nama Guru Piket</h3>
+            <div class="guru-role" id="guru-role-display">Guru Piket</div>
+            <div class="guru-day-badge" id="guru-day-badge">Hari ini</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div class="info-stats">
+        <div class="stat-card">
+          <div class="stat-num" id="stat-siswa">--</div>
+          <div class="stat-label">Siswa Aktif</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num" id="stat-guru">--</div>
+          <div class="stat-label">Tenaga Pendidik</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num" id="stat-kelas">--</div>
+          <div class="stat-label">Rombel</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num" id="stat-ekskul">--</div>
+          <div class="stat-label">Ekstrakurikuler</div>
+        </div>
+      </div>
+
+      <!-- Pengumuman -->
+      <div class="announce-panel">
+        <div class="panel-title">📋 Pengumuman</div>
+        <ul class="announce-list" id="announce-list">
+          <li class="announce-item">
+            <span class="announce-icon">◆</span>
+            <span>Tambahkan pengumuman melalui menu Admin</span>
+          </li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Running text BOTTOM -->
+  <div class="running-text-bar bottom" id="bar-bottom">
+    <div class="ticker-label" style="background:var(--accent2)">🔔 UPDATE</div>
+    <div class="ticker-wrap">
+      <div class="ticker-text" id="ticker-bottom-text">Informasi Terkini Sekolah ✦ Pantau Terus Papan Informasi Ini ✦ Terima kasih atas perhatian Anda ✦</div>
+    </div>
+  </div>
+</div>
+
+<!-- Tombol admin -->
+<button id="btn-admin" onclick="openAdmin()" title="Buka Panel Admin">⚙</button>
+
+<!-- Toast notification -->
+<div class="toast" id="toast">✓ Perubahan disimpan</div>
+
+<!-- ============= ADMIN PANEL ============= -->
+<div id="admin-panel">
+  <div class="admin-header">
+    <div class="admin-title">⚙ PANEL ADMIN</div>
+    <button class="btn-close-admin" onclick="closeAdmin()">✕ TUTUP &amp; KEMBALI</button>
+  </div>
+
+  <div class="admin-grid">
+
+    <!-- Identitas Sekolah -->
+    <div class="admin-section">
+      <div class="admin-section-title">🏫 Identitas Sekolah</div>
+      <div class="form-group">
+        <label>Nama Sekolah</label>
+        <input type="text" id="inp-school-name" placeholder="SMA Negeri 1 Contoh" value="SMA NEGERI 1 CONTOH">
+      </div>
+      <div class="form-group">
+        <label>Tagline / Motto</label>
+        <input type="text" id="inp-school-tagline" placeholder="Unggul · Berkarakter · Berprestasi" value="Unggul · Berkarakter · Berprestasi">
+      </div>
+      <div class="form-group">
+        <label>Logo Sekolah (upload gambar)</label>
+        <input type="file" id="inp-logo" accept="image/*" onchange="previewLogo(this)">
+        <img id="logo-preview-img" src="" alt="preview logo">
+      </div>
+      <div class="admin-btn-bar">
+        <button class="btn btn-primary" onclick="saveSchool()">💾 SIMPAN</button>
+      </div>
+    </div>
+
+    <!-- Data Statistik -->
+    <div class="admin-section">
+      <div class="admin-section-title">📊 Data Statistik Sekolah</div>
+      <div class="form-group">
+        <label>Jumlah Siswa Aktif</label>
+        <input type="text" id="inp-siswa" placeholder="850" value="">
+      </div>
+      <div class="form-group">
+        <label>Jumlah Tenaga Pendidik</label>
+        <input type="text" id="inp-guru-count" placeholder="64" value="">
+      </div>
+      <div class="form-group">
+        <label>Jumlah Rombongan Belajar</label>
+        <input type="text" id="inp-kelas" placeholder="24" value="">
+      </div>
+      <div class="form-group">
+        <label>Jumlah Ekstrakurikuler</label>
+        <input type="text" id="inp-ekskul" placeholder="18" value="">
+      </div>
+      <div class="admin-btn-bar">
+        <button class="btn btn-primary" onclick="saveStats()">💾 SIMPAN</button>
+      </div>
+    </div>
+
+    <!-- Running Text -->
+    <div class="admin-section full-width">
+      <div class="admin-section-title">📢 Running Text (Berjalan)</div>
+      <div class="admin-grid" style="gap:16px">
+        <div>
+          <div class="form-group">
+            <label>🔵 Teks Atas (Biru / Info)</label>
+            <textarea id="inp-ticker-top" rows="3">Selamat Datang di Sistem Informasi Digital Sekolah ✦ Semangat Belajar dan Berprestasi ✦ Jadikan Setiap Hari Sebagai Kesempatan Meraih Prestasi Terbaik ✦</textarea>
+          </div>
+          <div class="form-group">
+            <label>Kecepatan Teks Atas (detik)</label>
+            <select id="inp-speed-top">
+              <option value="15s">Sangat Cepat (15s)</option>
+              <option value="25s" selected>Cepat (25s)</option>
+              <option value="40s">Normal (40s)</option>
+              <option value="60s">Lambat (60s)</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <div class="form-group">
+            <label>🟠 Teks Bawah (Oranye / Update)</label>
+            <textarea id="inp-ticker-bottom" rows="3">Informasi Terkini Sekolah ✦ Pantau Terus Papan Informasi Ini ✦ Terima kasih atas perhatian Anda ✦</textarea>
+          </div>
+          <div class="form-group">
+            <label>Kecepatan Teks Bawah (detik)</label>
+            <select id="inp-speed-bottom">
+              <option value="15s">Sangat Cepat (15s)</option>
+              <option value="30s" selected>Cepat (30s)</option>
+              <option value="45s">Normal (45s)</option>
+              <option value="70s">Lambat (70s)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="admin-btn-bar">
+        <button class="btn btn-primary" onclick="saveRunningText()">💾 SIMPAN RUNNING TEXT</button>
+      </div>
+    </div>
+
+    <!-- Guru Piket -->
+    <div class="admin-section full-width">
+      <div class="admin-section-title">👨‍🏫 Jadwal Guru Piket</div>
+      <table class="guru-table" id="guru-table">
+        <thead>
+          <tr>
+            <th>Foto</th>
+            <th>Hari</th>
+            <th>Nama Guru</th>
+            <th>Jabatan</th>
+            <th>Aksi</th>
+          </tr>
+        </thead>
+        <tbody id="guru-tbody"></tbody>
+      </table>
+      <div style="margin-top:16px; padding-top:16px; border-top:1px solid var(--border)">
+        <div style="font-family:'Orbitron',monospace;font-size:10px;color:var(--accent);letter-spacing:1px;margin-bottom:12px;">➕ TAMBAH GURU PIKET</div>
+        <div class="admin-grid" style="gap:12px">
+          <div>
+            <div class="form-group">
+              <label>Hari</label>
+              <select id="inp-guru-day">
+                <option>Senin</option><option>Selasa</option><option>Rabu</option>
+                <option>Kamis</option><option>Jumat</option><option>Sabtu</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Nama Guru</label>
+              <input type="text" id="inp-guru-name" placeholder="Nama lengkap guru">
+            </div>
+          </div>
+          <div>
+            <div class="form-group">
+              <label>Jabatan / Mata Pelajaran</label>
+              <input type="text" id="inp-guru-role" placeholder="Guru Mata Pelajaran / Wali Kelas">
+            </div>
+            <div class="form-group">
+              <label>Foto Guru (opsional)</label>
+              <input type="file" id="inp-guru-photo" accept="image/*">
+              <div class="photo-preview">
+                <img id="guru-photo-preview" src="" alt="">
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="admin-btn-bar">
+          <button class="btn btn-primary" onclick="addGuru()">➕ TAMBAH</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Media (Slideshow / Video) -->
+    <div class="admin-section full-width">
+      <div class="admin-section-title">🎬 Media Informasi (Slideshow / Video)</div>
+      <div class="form-group">
+        <label>Mode Tampilan Media</label>
+        <select id="inp-media-mode" onchange="changeMediaMode(this.value)">
+          <option value="slideshow">🖼️ Slideshow Foto</option>
+          <option value="video">🎥 Video</option>
+        </select>
+      </div>
+      
+      <div id="admin-slideshow-section">
+        <div class="form-group">
+          <label>Tambah Foto ke Slideshow</label>
+          <input type="file" id="inp-slide-photo" accept="image/*" multiple onchange="addSlidePhotos(this)">
+        </div>
+        <div class="form-group">
+          <label>Interval Pergantian Slide (detik)</label>
+          <select id="inp-slide-interval">
+            <option value="3000">3 detik</option>
+            <option value="5000" selected>5 detik</option>
+            <option value="8000">8 detik</option>
+            <option value="10000">10 detik</option>
+            <option value="15000">15 detik</option>
+          </select>
+        </div>
+        <div>
+          <label>Daftar Foto Slideshow</label>
+          <ul class="media-list" id="slide-list" style="margin-top:8px;max-height:180px;overflow-y:auto"></ul>
+        </div>
+      </div>
+
+      <div id="admin-video-section" style="display:none">
+        <div class="form-group">
+          <label>Upload File Video (MP4/WebM/Ogg)</label>
+          <input type="file" id="inp-video" accept="video/*" onchange="loadVideo(this)">
+        </div>
+        <div class="form-group">
+          <label>Atau URL Video (YouTube embed / URL langsung)</label>
+          <input type="text" id="inp-video-url" placeholder="https://...">
+        </div>
+        <div class="admin-btn-bar">
+          <button class="btn btn-primary" onclick="applyVideoUrl()">▶ TERAPKAN URL</button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Pengumuman -->
+    <div class="admin-section full-width">
+      <div class="admin-section-title">📋 Pengumuman</div>
+      <ul class="media-list" id="admin-announce-list" style="margin-bottom:12px;max-height:150px;overflow-y:auto"></ul>
+      <div class="admin-grid" style="gap:12px">
+        <div>
+          <div class="form-group">
+            <label>Teks Pengumuman Baru</label>
+            <textarea id="inp-announce" rows="2" placeholder="Masukkan teks pengumuman..."></textarea>
+          </div>
+        </div>
+      </div>
+      <div class="admin-btn-bar">
+        <button class="btn btn-primary" onclick="addAnnounce()">➕ TAMBAH PENGUMUMAN</button>
+      </div>
+    </div>
+
+  </div><!-- end admin-grid -->
+
+  <div style="text-align:center;margin-top:20px;color:rgba(255,255,255,0.2);font-size:11px;font-family:'Orbitron',monospace;letter-spacing:2px;">
+    TV INFORMASI DIGITAL SEKOLAH &copy; 2025
+  </div>
+</div><!-- end admin-panel -->
+
+<script>
+// ============================================================
+// DATA STORE
+// ============================================================
+let appData = {
+  school: {
+    name: 'SMA NEGERI 1 CONTOH',
+    tagline: 'Unggul · Berkarakter · Berprestasi',
+    logo: null
+  },
+  stats: { siswa:'--', guru:'--', kelas:'--', ekskul:'--' },
+  tickerTop: 'Selamat Datang di Sistem Informasi Digital Sekolah ✦ Semangat Belajar dan Berprestasi ✦ Jadikan Setiap Hari Sebagai Kesempatan Meraih Prestasi Terbaik ✦',
+  tickerBottom: 'Informasi Terkini Sekolah ✦ Pantau Terus Papan Informasi Ini ✦ Terima kasih atas perhatian Anda ✦',
+  speedTop: '25s',
+  speedBottom: '30s',
+  guruPiket: [
+    { hari:'Senin', nama:'Bpk. Ahmad Fauzi, S.Pd', jabatan:'Guru Matematika', photo:null },
+    { hari:'Selasa', nama:'Ibu Siti Rahayu, M.Pd', jabatan:'Guru Bahasa Indonesia', photo:null },
+    { hari:'Rabu', nama:'Bpk. Hendra Gunawan, S.T', jabatan:'Guru TIK', photo:null },
+    { hari:'Kamis', nama:'Ibu Dewi Lestari, S.Pd', jabatan:'Guru Bahasa Inggris', photo:null },
+    { hari:'Jumat', nama:'Bpk. Rizky Pratama, S.Pd', jabatan:'Guru Olahraga', photo:null },
+    { hari:'Sabtu', nama:'Ibu Nurhayati, M.Pd', jabatan:'Guru Seni Budaya', photo:null }
+  ],
+  mediaMode: 'slideshow',
+  slides: [], // array of {name, dataUrl}
+  slideInterval: 5000,
+  videoFile: null,
+  videoUrl: '',
+  announcements: [
+    'Ujian Tengah Semester akan dilaksanakan pada minggu depan',
+    'Kegiatan OSIS: Rapat koordinasi hari Senin pukul 14.00 di Ruang OSIS',
+    'Pengumpulan tugas Prakarya paling lambat hari Jumat',
+    'Pendaftaran ekstrakurikuler baru dibuka hingga akhir bulan'
+  ]
+};
+
+// ============================================================
+// CLOCK
+// ============================================================
+const HARI = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+const BULAN = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+
+function updateClock() {
+  const now = new Date();
+  const h = String(now.getHours()).padStart(2,'0');
+  const m = String(now.getMinutes()).padStart(2,'0');
+  const s = String(now.getSeconds()).padStart(2,'0');
+  document.getElementById('clock-time').innerHTML = `${h}<span class="blink">:</span>${m}<span class="blink">:</span>${s}`;
+  const hari = HARI[now.getDay()];
+  const tgl = now.getDate();
+  const bln = BULAN[now.getMonth()];
+  const thn = now.getFullYear();
+  document.getElementById('clock-date').textContent = `${hari}, ${tgl} ${bln} ${thn}`;
+  document.getElementById('clock-day').textContent = `Hari ${hari}`;
+  updateGuruPiketDisplay(hari);
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// ============================================================
+// GURU PIKET
+// ============================================================
+function updateGuruPiketDisplay(hariIni) {
+  const guru = appData.guruPiket.find(g => g.hari === hariIni);
+  const nameEl = document.getElementById('guru-name-display');
+  const roleEl = document.getElementById('guru-role-display');
+  const badgeEl = document.getElementById('guru-day-badge');
+  const photoImg = document.getElementById('guru-photo-img');
+  const photoEmoji = document.getElementById('guru-photo-emoji');
+
+  if (guru) {
+    nameEl.textContent = guru.nama;
+    roleEl.textContent = guru.jabatan;
+    badgeEl.textContent = `📅 ${guru.hari}`;
+    if (guru.photo) {
+      photoImg.src = guru.photo;
+      photoImg.style.display = 'block';
+      photoEmoji.style.display = 'none';
+    } else {
+      photoImg.style.display = 'none';
+      photoEmoji.style.display = 'block';
+      photoEmoji.textContent = '👤';
+    }
+  } else {
+    nameEl.textContent = 'Tidak ada jadwal';
+    roleEl.textContent = 'Hari ' + hariIni;
+    badgeEl.textContent = hariIni;
+    photoImg.style.display = 'none';
+    photoEmoji.style.display = 'block';
+  }
+}
+
+// ============================================================
+// SLIDESHOW
+// ============================================================
+let currentSlide = 0;
+let slideTimer = null;
+
+function renderSlides() {
+  const container = document.getElementById('slideshow-container');
+  const dotsEl = document.getElementById('slide-dots');
+  
+  // Remove old slides (keep dots)
+  const oldSlides = container.querySelectorAll('.slide');
+  oldSlides.forEach(s => s.remove());
+  
+  dotsEl.innerHTML = '';
+
+  if (appData.slides.length === 0) {
+    const placeholder = document.createElement('div');
+    placeholder.className = 'slide active';
+    placeholder.id = 'slide-0';
+    placeholder.innerHTML = '<div class="slide-placeholder"><span>🖼️</span><div>Tambahkan Foto di Menu Admin</div></div>';
+    container.insertBefore(placeholder, dotsEl);
+    return;
+  }
+
+  appData.slides.forEach((slide, i) => {
+    const div = document.createElement('div');
+    div.className = 'slide' + (i === 0 ? ' active' : '');
+    div.id = `slide-${i}`;
+    const img = document.createElement('img');
+    img.src = slide.dataUrl;
+    img.alt = slide.name;
+    div.appendChild(img);
+    container.insertBefore(div, dotsEl);
+
+    const dot = document.createElement('div');
+    dot.className = 'dot' + (i === 0 ? ' active' : '');
+    dot.onclick = () => goToSlide(i);
+    dotsEl.appendChild(dot);
+  });
+
+  currentSlide = 0;
+  startSlideshow();
+}
+
+function goToSlide(n) {
+  const slides = document.querySelectorAll('.slide');
+  const dots = document.querySelectorAll('.dot');
+  if (!slides.length) return;
+  slides[currentSlide]?.classList.remove('active');
+  dots[currentSlide]?.classList.remove('active');
+  currentSlide = (n + appData.slides.length) % appData.slides.length;
+  slides[currentSlide]?.classList.add('active');
+  dots[currentSlide]?.classList.add('active');
+}
+
+function startSlideshow() {
+  if (slideTimer) clearInterval(slideTimer);
+  if (appData.slides.length <= 1) return;
+  slideTimer = setInterval(() => goToSlide(currentSlide + 1), appData.slideInterval);
+}
+
+function setMediaMode(mode) {
+  appData.mediaMode = mode;
+  const ssContainer = document.getElementById('slideshow-container');
+  const vidContainer = document.getElementById('video-container');
+  const badgeSlide = document.getElementById('badge-slide');
+  const badgeVideo = document.getElementById('badge-video');
+
+  if (mode === 'slideshow') {
+    ssContainer.style.display = 'block';
+    vidContainer.style.display = 'none';
+    badgeSlide.classList.add('active-mode');
+    badgeVideo.classList.remove('active-mode');
+    renderSlides();
+  } else {
+    ssContainer.style.display = 'none';
+    vidContainer.style.display = 'block';
+    badgeSlide.classList.remove('active-mode');
+    badgeVideo.classList.add('active-mode');
+    if (slideTimer) clearInterval(slideTimer);
+  }
+}
+
+// ============================================================
+// RUNNING TEXT
+// ============================================================
+function applyRunningText() {
+  document.getElementById('ticker-top-text').textContent = appData.tickerTop;
+  document.getElementById('ticker-bottom-text').textContent = appData.tickerBottom;
+  document.getElementById('ticker-top-text').style.animationDuration = appData.speedTop;
+  document.getElementById('ticker-bottom-text').style.animationDuration = appData.speedBottom;
+}
+
+// ============================================================
+// ANNOUNCEMENTS
+// ============================================================
+function renderAnnouncements() {
+  const list = document.getElementById('announce-list');
+  list.innerHTML = '';
+  if (!appData.announcements.length) {
+    list.innerHTML = '<li class="announce-item"><span class="announce-icon">◆</span><span>Belum ada pengumuman</span></li>';
+    return;
+  }
+  appData.announcements.forEach(a => {
+    const li = document.createElement('li');
+    li.className = 'announce-item';
+    li.innerHTML = `<span class="announce-icon">◆</span><span>${a}</span>`;
+    list.appendChild(li);
+  });
+  renderAdminAnnounceList();
+}
+
+function renderAdminAnnounceList() {
+  const list = document.getElementById('admin-announce-list');
+  list.innerHTML = '';
+  appData.announcements.forEach((a, i) => {
+    const li = document.createElement('li');
+    li.className = 'media-item';
+    li.innerHTML = `<span class="media-item-name"><span class="media-type-badge">PENGUMUMAN</span>${a}</span>
+      <button class="btn btn-danger" style="padding:4px 10px;font-size:9px" onclick="deleteAnnounce(${i})">✕</button>`;
+    list.appendChild(li);
+  });
+}
+
+// ============================================================
+// ADMIN FUNCTIONS
+// ============================================================
+function openAdmin() {
+  document.getElementById('admin-panel').style.display = 'block';
+  syncAdminFields();
+  renderGuruTable();
+  renderAdminAnnounceList();
+  renderAdminSlideList();
+}
+
+function closeAdmin() {
+  document.getElementById('admin-panel').style.display = 'none';
+}
+
+function syncAdminFields() {
+  document.getElementById('inp-school-name').value = appData.school.name;
+  document.getElementById('inp-school-tagline').value = appData.school.tagline;
+  document.getElementById('inp-ticker-top').value = appData.tickerTop;
+  document.getElementById('inp-ticker-bottom').value = appData.tickerBottom;
+  document.getElementById('inp-speed-top').value = appData.speedTop;
+  document.getElementById('inp-speed-bottom').value = appData.speedBottom;
+  document.getElementById('inp-media-mode').value = appData.mediaMode;
+  document.getElementById('inp-slide-interval').value = appData.slideInterval;
+  document.getElementById('inp-siswa').value = appData.stats.siswa === '--' ? '' : appData.stats.siswa;
+  document.getElementById('inp-guru-count').value = appData.stats.guru === '--' ? '' : appData.stats.guru;
+  document.getElementById('inp-kelas').value = appData.stats.kelas === '--' ? '' : appData.stats.kelas;
+  document.getElementById('inp-ekskul').value = appData.stats.ekskul === '--' ? '' : appData.stats.ekskul;
+  document.getElementById('admin-slideshow-section').style.display = appData.mediaMode === 'slideshow' ? 'block' : 'none';
+  document.getElementById('admin-video-section').style.display = appData.mediaMode === 'video' ? 'block' : 'none';
+}
+
+function saveSchool() {
+  appData.school.name = document.getElementById('inp-school-name').value || appData.school.name;
+  appData.school.tagline = document.getElementById('inp-school-tagline').value || appData.school.tagline;
+  document.getElementById('school-name-display').textContent = appData.school.name;
+  document.getElementById('school-tagline-display').textContent = appData.school.tagline;
+  
+  const logoInput = document.getElementById('inp-logo');
+  if (logoInput.files && logoInput.files[0]) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      appData.school.logo = e.target.result;
+      const logoImg = document.getElementById('logo-img');
+      const logoEmoji = document.getElementById('logo-emoji');
+      logoImg.src = e.target.result;
+      logoImg.style.display = 'block';
+      logoEmoji.style.display = 'none';
+    };
+    reader.readAsDataURL(logoInput.files[0]);
+  }
+  showToast('✓ Identitas sekolah disimpan');
+}
+
+function saveStats() {
+  appData.stats.siswa = document.getElementById('inp-siswa').value || '--';
+  appData.stats.guru = document.getElementById('inp-guru-count').value || '--';
+  appData.stats.kelas = document.getElementById('inp-kelas').value || '--';
+  appData.stats.ekskul = document.getElementById('inp-ekskul').value || '--';
+  document.getElementById('stat-siswa').textContent = appData.stats.siswa;
+  document.getElementById('stat-guru').textContent = appData.stats.guru;
+  document.getElementById('stat-kelas').textContent = appData.stats.kelas;
+  document.getElementById('stat-ekskul').textContent = appData.stats.ekskul;
+  showToast('✓ Data statistik disimpan');
+}
+
+function saveRunningText() {
+  appData.tickerTop = document.getElementById('inp-ticker-top').value;
+  appData.tickerBottom = document.getElementById('inp-ticker-bottom').value;
+  appData.speedTop = document.getElementById('inp-speed-top').value;
+  appData.speedBottom = document.getElementById('inp-speed-bottom').value;
+  
+  // Restart animation by cloning
+  restartTicker('ticker-top-text', appData.tickerTop, appData.speedTop);
+  restartTicker('ticker-bottom-text', appData.tickerBottom, appData.speedBottom);
+  showToast('✓ Running text diperbarui');
+}
+
+function restartTicker(id, text, speed) {
+  const el = document.getElementById(id);
+  const clone = el.cloneNode(true);
+  clone.textContent = text;
+  clone.style.animationDuration = speed;
+  el.parentNode.replaceChild(clone, el);
+}
+
+function previewLogo(input) {
+  if (input.files && input.files[0]) {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const prev = document.getElementById('logo-preview-img');
+      prev.src = e.target.result;
+      prev.style.display = 'block';
+    };
+    reader.readAsDataURL(input.files[0]);
+  }
+}
+
+// GURU PIKET
+function renderGuruTable() {
+  const tbody = document.getElementById('guru-tbody');
+  tbody.innerHTML = '';
+  appData.guruPiket.forEach((g, i) => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>
+        <div class="guru-thumb">
+          ${g.photo ? `<img src="${g.photo}" style="display:block">` : '👤'}
+        </div>
+      </td>
+      <td style="color:var(--accent);font-family:'Orbitron',monospace;font-size:10px">${g.hari}</td>
+      <td>${g.nama}</td>
+      <td style="color:rgba(255,255,255,0.6);font-size:11px">${g.jabatan}</td>
+      <td>
+        <button class="btn btn-danger" style="padding:4px 10px;font-size:9px" onclick="deleteGuru(${i})">✕ Hapus</button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function addGuru() {
+  const hari = document.getElementById('inp-guru-day').value;
+  const nama = document.getElementById('inp-guru-name').value.trim();
+  const jabatan = document.getElementById('inp-guru-role').value.trim();
+  const photoInput = document.getElementById('inp-guru-photo');
+
+  if (!nama) { alert('Nama guru wajib diisi!'); return; }
+
+  const doAdd = (photoData) => {
+    // Remove existing entry for same day
+    appData.guruPiket = appData.guruPiket.filter(g => g.hari !== hari);
+    appData.guruPiket.push({ hari, nama, jabatan: jabatan || 'Guru Piket', photo: photoData });
+    // Sort by day order
+    const order = ['Senin','Selasa','Rabu','Kamis','Jumat','Sabtu','Minggu'];
+    appData.guruPiket.sort((a,b) => order.indexOf(a.hari) - order.indexOf(b.hari));
+    renderGuruTable();
+    document.getElementById('inp-guru-name').value = '';
+    document.getElementById('inp-guru-role').value = '';
+    document.getElementById('inp-guru-photo').value = '';
+    document.getElementById('guru-photo-preview').style.display = 'none';
+    showToast(`✓ Guru piket ${hari} ditambahkan`);
+  };
+
+  if (photoInput.files && photoInput.files[0]) {
+    const reader = new FileReader();
+    reader.onload = e => doAdd(e.target.result);
+    reader.readAsDataURL(photoInput.files[0]);
+  } else {
+    doAdd(null);
+  }
+}
+
+document.getElementById('inp-guru-photo').addEventListener('change', function() {
+  if (this.files && this.files[0]) {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const prev = document.getElementById('guru-photo-preview');
+      prev.src = e.target.result;
+      prev.style.display = 'block';
+    };
+    reader.readAsDataURL(this.files[0]);
+  }
+});
+
+function deleteGuru(i) {
+  if (confirm('Hapus jadwal guru piket ini?')) {
+    appData.guruPiket.splice(i, 1);
+    renderGuruTable();
+    showToast('✓ Data guru dihapus');
+  }
+}
+
+// MEDIA
+function changeMediaMode(mode) {
+  appData.mediaMode = mode;
+  document.getElementById('admin-slideshow-section').style.display = mode === 'slideshow' ? 'block' : 'none';
+  document.getElementById('admin-video-section').style.display = mode === 'video' ? 'block' : 'none';
+  setMediaMode(mode);
+}
+
+function addSlidePhotos(input) {
+  const files = Array.from(input.files);
+  let loaded = 0;
+  files.forEach(file => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      appData.slides.push({ name: file.name, dataUrl: e.target.result });
+      loaded++;
+      if (loaded === files.length) {
+        renderSlides();
+        renderAdminSlideList();
+        showToast(`✓ ${files.length} foto ditambahkan`);
+      }
+    };
+    reader.readAsDataURL(file);
+  });
+  appData.slideInterval = parseInt(document.getElementById('inp-slide-interval').value) || 5000;
+}
+
+function renderAdminSlideList() {
+  const list = document.getElementById('slide-list');
+  list.innerHTML = '';
+  if (!appData.slides.length) {
+    list.innerHTML = '<li style="color:rgba(255,255,255,0.3);font-size:12px;font-family:Rajdhani,sans-serif;padding:8px">Belum ada foto</li>';
+    return;
+  }
+  appData.slides.forEach((s, i) => {
+    const li = document.createElement('li');
+    li.className = 'media-item';
+    li.innerHTML = `
+      <span class="media-item-name">
+        <img src="${s.dataUrl}" style="width:32px;height:32px;object-fit:cover;border-radius:4px;border:1px solid var(--border)">
+        <span class="media-type-badge">IMG</span>
+        ${s.name}
+      </span>
+      <button class="btn btn-danger" style="padding:4px 10px;font-size:9px" onclick="deleteSlide(${i})">✕</button>
+    `;
+    list.appendChild(li);
+  });
+}
+
+function deleteSlide(i) {
+  appData.slides.splice(i, 1);
+  renderSlides();
+  renderAdminSlideList();
+  showToast('✓ Foto dihapus');
+}
+
+function loadVideo(input) {
+  if (input.files && input.files[0]) {
+    const url = URL.createObjectURL(input.files[0]);
+    const video = document.getElementById('main-video');
+    const source = document.getElementById('video-source');
+    source.src = url;
+    video.load();
+    video.play();
+    showToast('✓ Video dimuat');
+  }
+}
+
+function applyVideoUrl() {
+  const url = document.getElementById('inp-video-url').value.trim();
+  if (!url) return;
+  const video = document.getElementById('main-video');
+  const source = document.getElementById('video-source');
+  source.src = url;
+  video.load();
+  video.play();
+  showToast('✓ URL video diterapkan');
+}
+
+// ANNOUNCEMENTS
+function addAnnounce() {
+  const text = document.getElementById('inp-announce').value.trim();
+  if (!text) return;
+  appData.announcements.unshift(text);
+  document.getElementById('inp-announce').value = '';
+  renderAnnouncements();
+  showToast('✓ Pengumuman ditambahkan');
+}
+
+function deleteAnnounce(i) {
+  appData.announcements.splice(i, 1);
+  renderAnnouncements();
+  showToast('✓ Pengumuman dihapus');
+}
+
+// TOAST
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ============================================================
+// INIT
+// ============================================================
+function init() {
+  applyRunningText();
+  renderAnnouncements();
+  setMediaMode('slideshow');
+  document.getElementById('badge-slide').classList.add('active-mode');
+}
+
+init();
+
+// Keyboard shortcut: Ctrl+Shift+A = open admin
+document.addEventListener('keydown', e => {
+  if (e.ctrlKey && e.shiftKey && e.key === 'A') openAdmin();
+});
+</script>
+</body>
+</html>
