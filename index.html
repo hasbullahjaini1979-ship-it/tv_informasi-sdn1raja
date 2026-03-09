@@ -530,26 +530,53 @@ input[type=file]::-webkit-file-upload-button{background:rgba(245,196,0,.12);bord
       <div>
         <div class="bcard">
           <h3>💾 DOWNLOAD BACKUP</h3>
-          <p>Ekspor semua pengaturan ke file .json</p>
-          <div class="binf bi-b">Termasuk: identitas, jadwal guru, pengumuman, jam pelajaran, statistik.</div>
+          <p>Ekspor semua pengaturan ke file .json (termasuk foto URL, jam pelajaran, running text)</p>
+          <div class="binf bi-b">Data tersimpan otomatis di browser ini. Backup untuk digunakan di perangkat lain.</div>
           <div class="brow"><button class="btn by" onclick="doBackup()">⬇ DOWNLOAD .JSON</button></div>
         </div>
         <div class="bcard">
           <h3>📂 RESTORE BACKUP</h3>
-          <p>Pulihkan dari file .json backup</p>
+          <p>Upload file .json untuk memulihkan semua pengaturan</p>
           <div class="binf bi-r">⚠️ Semua pengaturan saat ini akan diganti!</div>
           <div class="fr"><input type="file" id="iRest" accept=".json" onchange="doRestore(this)"></div>
           <div id="restInfo" style="display:none;margin-top:8px;padding:8px;background:rgba(20,160,70,.1);border:1px solid rgba(20,160,70,.3);border-radius:var(--rs);font-size:11px;color:#60e090"></div>
         </div>
+        <div class="bcard">
+          <h3>🗑 HAPUS CACHE LOKAL</h3>
+          <p>Reset semua data di browser ini ke default</p>
+          <div class="brow"><button class="btn br" onclick="clearLS()">🗑 HAPUS CACHE</button></div>
+        </div>
       </div>
       <div class="asec">
         <div class="stl">📊 Google Sheet Sync</div>
-        <div class="binf bi-b" style="margin-bottom:10px">URL Apps Script sudah tertanam di aplikasi. Sheet otomatis sync saat halaman dibuka.</div>
+        <div class="binf bi-b" style="margin-bottom:10px">
+          Data tersimpan otomatis di <strong>localStorage browser</strong> (persisten di perangkat ini).<br><br>
+          Untuk berbagi ke perangkat lain: klik <strong>PUSH ke Sheet</strong> di perangkat ini, lalu buka halaman di perangkat lain dan klik <strong>SYNC dari Sheet</strong>.
+        </div>
         <div id="gsConnStat" class="gstat gs-id"><span class="dot did"></span><span>Belum dicek</span></div>
         <div class="brow" style="flex-direction:column;gap:7px">
-          <button class="btn by" onclick="gsTest()" style="width:100%">🔌 TEST KONEKSI</button>
-          <button class="btn bb" onclick="gsSyncAll()" style="width:100%">🔄 SYNC SEMUA DARI SHEET</button>
+          <button class="btn by" onclick="gsTest()" style="width:100%">🔌 TEST KONEKSI SHEET</button>
           <button class="btn bg" onclick="gsPushAll()" style="width:100%">⬆ PUSH SEMUA KE SHEET</button>
+          <button class="btn bb" onclick="gsSyncAll()" style="width:100%">🔄 SYNC SEMUA DARI SHEET</button>
+        </div>
+        <div style="margin-top:12px;padding:10px;background:rgba(245,196,0,.06);border:1px solid rgba(245,196,0,.2);border-radius:var(--rs)">
+          <div style="font-family:'Bebas Neue';font-size:11px;letter-spacing:1.5px;color:var(--c3);margin-bottom:6px">⚠️ PENTING — APPS SCRIPT BARU</div>
+          <div style="font-size:10px;color:var(--txt2);line-height:1.7;font-family:'Nunito'">
+            Apps Script perlu di-update ke versi terbaru yang mendukung GET request.<br>
+            Buka Google Sheet → Ekstensi → Apps Script → Ganti kode → Deploy ulang.
+          </div>
+          <div class="brow" style="margin-top:8px"><button class="btn bo" onclick="showGsCode()" style="width:100%">📋 LIHAT KODE APPS SCRIPT TERBARU</button></div>
+        </div>
+      </div>
+    </div>
+    <!-- Apps Script code modal trigger -->
+    <div id="gsCodeBox" style="display:none;margin-top:14px">
+      <div class="asec w">
+        <div class="stl">Kode Google Apps Script — Copy &amp; Paste ke Apps Script Editor</div>
+        <div id="gsCodePre" style="background:#000;border:1px solid var(--border);border-radius:var(--rs);padding:14px;font-family:monospace;font-size:10px;color:#90ff90;max-height:380px;overflow-y:auto;line-height:1.7;white-space:pre"></div>
+        <div class="brow" style="margin-top:9px">
+          <button class="btn bb" onclick="copyGsCode()">📋 COPY KODE</button>
+          <button class="btn br" onclick="G('gsCodeBox').style.display='none'">✕ TUTUP</button>
         </div>
       </div>
     </div>
@@ -1020,16 +1047,16 @@ function saveIdent(){
   S.school.tagline = gv('iTag')  || S.school.tagline;
   G('tvName').textContent = S.school.name;
   G('tvTag').innerHTML    = S.school.tagline;
-  toast('Identitas disimpan','ok'); gsPush('settings');
+  saveAll(); toast('Identitas disimpan','ok');
 }
 
 function prevLogo(inp){ if(inp.files&&inp.files[0]) readFile(inp.files[0],function(u){ var p=G('logoPrev'); if(p){p.src=u;p.style.display='block';} }); }
 
 function saveLogo(){
   var urlRaw=gv('iLogoUrl').trim();
-  if(urlRaw){ var u=toDirectUrl(urlRaw); S.school.logo=u; var li=G('logoImg'); if(li) li.src=u; toast('Logo dari URL diterapkan','ok'); return; }
+  if(urlRaw){ var u=toDirectUrl(urlRaw); S.school.logo=u; var li=G('logoImg'); if(li) li.src=u; saveAll(); toast('Logo dari URL diterapkan','ok'); return; }
   var inp=G('iLogo'); if(!inp||!inp.files||!inp.files[0]){ toast('Pilih file atau masukkan URL logo!','err'); return; }
-  readFile(inp.files[0],function(url){ S.school.logo=url; var li=G('logoImg'); if(li) li.src=url; toast('Logo diperbarui','ok'); });
+  readFile(inp.files[0],function(url){ S.school.logo=url; var li=G('logoImg'); if(li) li.src=url; saveAll(); toast('Logo diperbarui','ok'); });
 }
 
 function saveStats(){
@@ -1039,14 +1066,14 @@ function saveStats(){
   S.stats.ekskul = gv('iEkskul') || '--';
   G('svSiswa').textContent=S.stats.siswa; G('svGuru').textContent=S.stats.guru;
   G('svKelas').textContent=S.stats.kelas; G('svEkskul').textContent=S.stats.ekskul;
-  toast('Statistik disimpan','ok'); gsPush('settings');
+  saveAll(); toast('Statistik disimpan','ok');
 }
 
 function saveRunText(){
   S.tkTop = gv('iTkT') || S.tkTop; S.tkBot = gv('iTkB') || S.tkBot;
   S.spTop = parseInt(gv('iSpT'))||30; S.spBot = parseInt(gv('iSpB'))||35;
   initTk('tkTop',S.tkTop,S.spTop); initTk('tkBot',S.tkBot,S.spBot);
-  toast('Running text diperbarui','ok'); gsPush('settings');
+  saveAll(); toast('Running text diperbarui','ok');
 }
 
 // ═══════════════════════════════════════════
@@ -1070,7 +1097,7 @@ function addGuru(){
     sv('iGName',''); sv('iGRole',''); sv('iGPhUrl','');
     if(G('iGPhoto')) G('iGPhoto').value='';
     var gp=G('gPPrev'); if(gp) gp.style.display='none';
-    toast('Guru piket '+hari+' ditambahkan','ok'); gsPush('guru');
+    saveAll(); toast('Guru piket '+hari+' ditambahkan','ok');
   }
 
   if(urlRaw){ doAdd(toDirectUrl(urlRaw)); return; }
@@ -1081,7 +1108,7 @@ function addGuru(){
 function delGuru(id){
   if(!confirm('Hapus guru ini?')) return;
   S.guru=S.guru.filter(function(g){ return g.id!==id; });
-  renderGuruTbl(); renderGuruTV(); toast('Data guru dihapus','ok'); gsPush('guru');
+  renderGuruTbl(); renderGuruTV(); saveAll(); toast('Data guru dihapus','ok');
 }
 
 function editGuru(id){
@@ -1109,12 +1136,12 @@ function mPrevPh(inp){ if(inp.files&&inp.files[0]) readFile(inp.files[0],functio
 function addAnn(){
   var t=gv('iAnn').trim(); if(!t) return;
   S.ann.push({id:'a'+Date.now(),teks:t}); sv('iAnn','');
-  renderAnnTV(); renderAnnTbl(); toast('Pengumuman ditambahkan','ok'); gsPush('ann');
+  renderAnnTV(); renderAnnTbl(); saveAll(); toast('Pengumuman ditambahkan','ok');
 }
 function delAnn(id){
   if(!confirm('Hapus pengumuman ini?')) return;
   S.ann=S.ann.filter(function(a){ return a.id!==id; });
-  renderAnnTV(); renderAnnTbl(); toast('Pengumuman dihapus','ok'); gsPush('ann');
+  renderAnnTV(); renderAnnTbl(); saveAll(); toast('Pengumuman dihapus','ok');
 }
 function editAnn(id){
   var a=S.ann.find(function(x){ return x.id===id; }); if(!a) return;
@@ -1180,13 +1207,13 @@ function modalSave(){
     var g=S.guru.find(function(x){ return x.id===S._eId; }); if(!g) return;
     g.hari=gv('eGDay'); g.nama=gv('eGName').trim(); g.jabatan=gv('eGRole').trim();
     var urlRaw=gv('eGPhUrl').trim(), ep=G('eGPhoto');
-    function finish(ph){ if(ph) g.photo=ph; sortGuru(); renderGuruTbl(); renderGuruTV(); toast('Data guru diperbarui','ok'); gsPush('guru'); closeModal(); }
+    function finish(ph){ if(ph) g.photo=ph; sortGuru(); renderGuruTbl(); renderGuruTV(); saveAll(); toast('Data guru diperbarui','ok'); closeModal(); }
     if(urlRaw){ finish(toDirectUrl(urlRaw)); return; }
     if(ep&&ep.files&&ep.files[0]) readFile(ep.files[0],finish); else finish(null);
   } else if(S._eType==='ann'){
     var a=S.ann.find(function(x){ return x.id===S._eId; }); if(!a) return;
     a.teks=gv('eAnnT').trim();
-    renderAnnTV(); renderAnnTbl(); toast('Pengumuman diperbarui','ok'); gsPush('ann'); closeModal();
+    renderAnnTV(); renderAnnTbl(); saveAll(); toast('Pengumuman diperbarui','ok'); closeModal();
   } else if(S._eType==='jam'){
     var j=S.jamPelajaran.find(function(x){ return x.id===S._eId; }); if(!j) return;
     j.label=gv('eJLbl').trim(); j.start=gv('eJStart').trim(); j.end=gv('eJEnd').trim(); j.tipe=gv('eJType');
@@ -1203,15 +1230,15 @@ function changeMode(m){ S.mediaMode=m; G('slideAdm').style.display=m==='slidesho
 function addSlides(inp){
   var files=Array.from(inp.files), done=0;
   S.slideInt=parseInt(gv('iSlInt'))||5000;
-  files.forEach(function(f){ readFile(f,function(url){ S.slides.push({name:f.name,url:url}); done++; if(done===files.length){ renderSlides(); renderSlideList(); toast(files.length+' foto ditambahkan','ok'); } }); });
+  files.forEach(function(f){ readFile(f,function(url){ S.slides.push({name:f.name,url:url}); done++; if(done===files.length){ renderSlides(); renderSlideList(); lsSave(); toast(files.length+' foto ditambahkan','ok'); } }); });
 }
 function addSlideUrl(){
   var raw=gv('iSlUrl').trim(); if(!raw){ toast('Masukkan URL foto!','err'); return; }
   S.slides.push({name:'URL foto', url:toDirectUrl(raw)});
   S.slideInt=parseInt(gv('iSlInt'))||5000;
-  renderSlides(); renderSlideList(); sv('iSlUrl',''); toast('URL foto ditambahkan','ok');
+  renderSlides(); renderSlideList(); sv('iSlUrl',''); saveAll(); toast('URL foto ditambahkan','ok');
 }
-function delSlide(i){ S.slides.splice(i,1); renderSlides(); renderSlideList(); toast('Foto dihapus','ok'); }
+function delSlide(i){ S.slides.splice(i,1); renderSlides(); renderSlideList(); saveAll(); toast('Foto dihapus','ok'); }
 function loadVid(inp){ if(inp.files&&inp.files[0]){ var u=URL.createObjectURL(inp.files[0]); var v=G('vidEl'),s=G('vidSrc'); if(s) s.src=u; if(v){v.load();v.play();} toast('Video dimuat','ok'); } }
 function applyVidUrl(){ var u=gv('iVidU').trim(); if(!u) return; var v=G('vidEl'),s=G('vidSrc'); if(s) s.src=toDirectUrl(u); if(v){v.load();v.play();} toast('URL video diterapkan','ok'); }
 
@@ -1221,89 +1248,195 @@ function applyVidUrl(){ var u=gv('iVidU').trim(); if(!u) return; var v=G('vidEl'
 function setTheme(t,btn){
   S.theme=t; document.documentElement.setAttribute('data-theme',t);
   document.querySelectorAll('.tbtn').forEach(function(b){ b.classList.remove('on'); });
-  btn.classList.add('on'); toast('Tema diubah','info');
+  btn.classList.add('on'); lsSave(); toast('Tema diubah','info');
 }
 
 // ═══════════════════════════════════════════
-//  GOOGLE SHEETS
+//  LOCAL STORAGE — simpan persisten di browser
 // ═══════════════════════════════════════════
-function gsReq(qs,body){
-  var url=GS_URL+(qs?'?'+qs:'');
-  var opts={method:body?'POST':'GET',mode:'cors'};
-  if(body){ opts.headers={'Content-Type':'application/json'}; opts.body=JSON.stringify(body); }
-  return fetch(url,opts).then(function(r){ return r.json(); });
+var LS_KEY = 'sdn1raja_tv_v3';
+
+function lsSave(){
+  try {
+    var snap = {
+      school: S.school,
+      stats: S.stats,
+      tkTop: S.tkTop, tkBot: S.tkBot, spTop: S.spTop, spBot: S.spBot,
+      guru: S.guru,
+      ann: S.ann,
+      jamPelajaran: S.jamPelajaran,
+      mediaMode: S.mediaMode,
+      slides: S.slides.filter(function(s){ return s.url && s.url.indexOf('http')===0; }), // hanya simpan URL, bukan base64
+      slideInt: S.slideInt,
+      theme: S.theme
+    };
+    localStorage.setItem(LS_KEY, JSON.stringify(snap));
+  } catch(e){ /* localStorage penuh / tidak tersedia */ }
+}
+
+function lsLoad(){
+  try {
+    var raw = localStorage.getItem(LS_KEY);
+    if(!raw) return false;
+    var d = JSON.parse(raw);
+    if(d.school) S.school = d.school;
+    if(d.stats) S.stats = d.stats;
+    if(d.tkTop) S.tkTop = d.tkTop;
+    if(d.tkBot) S.tkBot = d.tkBot;
+    if(d.spTop) S.spTop = d.spTop;
+    if(d.spBot) S.spBot = d.spBot;
+    if(d.guru) S.guru = d.guru;
+    if(d.ann) S.ann = d.ann;
+    if(d.jamPelajaran) S.jamPelajaran = d.jamPelajaran;
+    if(d.mediaMode) S.mediaMode = d.mediaMode;
+    if(d.slides) S.slides = d.slides;
+    if(d.slideInt) S.slideInt = d.slideInt;
+    if(d.theme !== undefined){ S.theme = d.theme; document.documentElement.setAttribute('data-theme', d.theme||''); }
+    return true;
+  } catch(e){ return false; }
+}
+
+// Auto-save setiap kali ada perubahan state
+function saveAll(){
+  lsSave();
+  // Push ke Sheet di background (tidak tunggu hasil)
+  gsPushBg('guru');
+  setTimeout(function(){ gsPushBg('ann'); }, 300);
+  setTimeout(function(){ gsPushBg('settings'); }, 600);
+}
+
+// ═══════════════════════════════════════════
+//  GOOGLE SHEETS — pakai GET untuk semua
+//  (menghindari CORS issue pada POST)
+// ═══════════════════════════════════════════
+
+// Encode data sebagai query string (GET request)
+function gsGet(qs){
+  return fetch(GS_URL+'?'+qs+'&t='+Date.now(), {method:'GET', mode:'cors'})
+    .then(function(r){ return r.json(); });
+}
+
+// Push data via GET dengan data di-encode sebagai JSON param
+function gsPushBg(type){
+  try {
+    var data;
+    if(type==='guru'){
+      data = S.guru.map(function(g){
+        return {id:g.id, hari:g.hari, nama:g.nama, jabatan:g.jabatan, photo:g.photo||''};
+      });
+    } else if(type==='ann'){
+      data = S.ann.map(function(a){ return {id:a.id, teks:a.teks}; });
+    } else if(type==='settings'){
+      data = {
+        schoolName:S.school.name, tagline:S.school.tagline,
+        logo: S.school.logo && S.school.logo.indexOf('http')===0 ? S.school.logo : '',
+        tickerTop:S.tkTop, tickerBottom:S.tkBot,
+        spTop:String(S.spTop), spBot:String(S.spBot),
+        siswa:S.stats.siswa, guru:S.stats.guru, kelas:S.stats.kelas, ekskul:S.stats.ekskul,
+        mediaMode:S.mediaMode, slideInt:String(S.slideInt), theme:S.theme,
+        slides: JSON.stringify(S.slides.filter(function(s){ return s.url&&s.url.indexOf('http')===0; })),
+        jamPelajaran: JSON.stringify(S.jamPelajaran)
+      };
+    }
+    var qs = 'action=set&type='+type+'&data='+encodeURIComponent(JSON.stringify(data));
+    fetch(GS_URL+'?'+qs, {method:'GET', mode:'cors'}).catch(function(){});
+  } catch(e){}
 }
 
 function gsTest(){
   setStat('gsConnStat','idle','Menguji koneksi...');
-  gsReq('action=ping')
+  gsGet('action=ping')
     .then(function(r){
-      if(r&&r.status==='ok') setStat('gsConnStat','ok','\u2713 Terhubung: '+(r.sheetName||'Google Sheet'));
-      else setStat('gsConnStat','err','Respons tidak valid');
-    }).catch(function(e){ setStat('gsConnStat','err','Error: '+e.message); });
+      if(r&&r.status==='ok'){
+        setStat('gsConnStat','ok','\u2713 Terhubung ke: '+(r.sheetName||'Google Sheet'));
+        toast('Koneksi berhasil!','ok');
+      } else {
+        setStat('gsConnStat','err','Respons tidak valid: '+JSON.stringify(r));
+      }
+    }).catch(function(e){ setStat('gsConnStat','err','Gagal: '+e.message); toast('Koneksi gagal!','err'); });
 }
 
-function gsSyncAll(){ toast('Sinkronisasi dari Sheet...','info'); syncGuru(); setTimeout(syncAnn,700); setTimeout(syncSettings,1400); }
-function gsPushAll(){ gsPush('guru'); setTimeout(function(){gsPush('ann');},400); setTimeout(function(){gsPush('settings');},800); toast('Data dikirim ke Sheet','info'); }
+function gsSyncAll(){
+  toast('Mengambil data dari Sheet...','info');
+  syncGuru();
+  setTimeout(syncAnn, 800);
+  setTimeout(syncSettings, 1600);
+}
+
+function gsPushAll(){
+  setStat('gsConnStat','idle','Mengirim data ke Sheet...');
+  gsPushBg('guru');
+  setTimeout(function(){ gsPushBg('ann'); }, 400);
+  setTimeout(function(){
+    gsPushBg('settings');
+    setTimeout(function(){
+      gsGet('action=ping').then(function(r){
+        if(r&&r.status==='ok') setStat('gsConnStat','ok','\u2713 Semua data berhasil dikirim ke Sheet');
+        else setStat('gsConnStat','err','Push mungkin gagal, cek Sheet');
+      }).catch(function(){ setStat('gsConnStat','err','Tidak bisa verifikasi, cek Sheet manual'); });
+    }, 1500);
+  }, 800);
+  lsSave();
+  toast('Data dikirim ke Sheet...','info');
+}
 
 function syncGuru(){
   var sp=G('gSpin'); if(sp) sp.style.display='inline-block';
-  gsReq('action=get&type=guru')
+  gsGet('action=get&type=guru')
     .then(function(r){
       if(sp) sp.style.display='none';
-      if(!r||r.status!=='ok'){ toast('Sync guru gagal','err'); return; }
-      var inc=r.data||[];
-      // MERGE: keep base64 photos locally, update other fields
-      inc.forEach(function(g){
-        var ex=S.guru.find(function(x){ return x.id===g.id; });
-        if(ex){
-          ex.hari=g.hari; ex.nama=g.nama; ex.jabatan=g.jabatan;
-          // Only update photo from sheet if it's a URL (not base64)
-          if(g.photo && g.photo.indexOf('http')===0) ex.photo=g.photo;
-        } else {
-          S.guru.push({id:g.id||'g'+Date.now(), hari:g.hari, nama:g.nama, jabatan:g.jabatan, photo:g.photo||null});
-        }
+      if(!r||r.status!=='ok'){ toast('Sync guru gagal: '+(r&&r.msg||'error'),'err'); return; }
+      var rows = r.data||[];
+      if(!rows.length){ toast('Sheet guru masih kosong','info'); return; }
+      // Replace semua data guru dari sheet
+      S.guru = rows.map(function(g){
+        return {id:g.id||'g'+Date.now()+Math.random(), hari:g.hari||'Senin', nama:g.nama||'', jabatan:g.jabatan||'Guru Kelas', photo:g.photo||null};
       });
       sortGuru(); renderGuruTbl(); renderGuruTV();
-      setStat('guruStat','ok','\u2713 Data guru disinkron dari Google Sheet');
-      toast('Data guru disinkron','ok');
+      lsSave();
+      setStat('guruStat','ok','\u2713 '+S.guru.length+' guru disinkron dari Sheet');
+      toast(S.guru.length+' guru berhasil disinkron','ok');
     }).catch(function(e){ if(sp) sp.style.display='none'; toast('Sync guru error: '+e.message,'err'); });
 }
 
 function syncAnn(){
-  gsReq('action=get&type=ann')
+  gsGet('action=get&type=ann')
     .then(function(r){
       if(!r||r.status!=='ok') return;
-      if(r.data&&r.data.length){
-        S.ann=r.data.map(function(a){ return {id:a.id||'a'+Date.now(), teks:a.teks}; });
-        renderAnnTV(); renderAnnTbl(); toast('Pengumuman disinkron','ok');
-      }
+      var rows=r.data||[];
+      if(!rows.length) return;
+      S.ann = rows.map(function(a){ return {id:a.id||'a'+Date.now(), teks:a.teks||''}; });
+      renderAnnTV(); renderAnnTbl(); lsSave();
+      toast('Pengumuman disinkron ('+S.ann.length+')','ok');
     }).catch(function(){});
 }
 
 function syncSettings(){
-  gsReq('action=get&type=settings')
+  gsGet('action=get&type=settings')
     .then(function(r){
       if(!r||r.status!=='ok') return;
-      var d=r.data||{};
-      if(d.schoolName) S.school.name=d.schoolName;
-      if(d.tagline) S.school.tagline=d.tagline;
-      if(d.tickerTop) S.tkTop=d.tickerTop;
-      if(d.tickerBottom) S.tkBot=d.tickerBottom;
-      if(d.siswa) S.stats.siswa=d.siswa;
-      if(d.guru) S.stats.guru=d.guru;
-      if(d.kelas) S.stats.kelas=d.kelas;
-      if(d.ekskul) S.stats.ekskul=d.ekskul;
-      applyAll(); toast('Pengaturan disinkron','ok');
+      var d = r.data||{};
+      if(d.schoolName) S.school.name = d.schoolName;
+      if(d.tagline) S.school.tagline = d.tagline;
+      if(d.logo) S.school.logo = d.logo;
+      if(d.tickerTop) S.tkTop = d.tickerTop;
+      if(d.tickerBottom) S.tkBot = d.tickerBottom;
+      if(d.spTop) S.spTop = parseInt(d.spTop)||30;
+      if(d.spBot) S.spBot = parseInt(d.spBot)||35;
+      if(d.siswa) S.stats.siswa = d.siswa;
+      if(d.guru) S.stats.guru = d.guru;
+      if(d.kelas) S.stats.kelas = d.kelas;
+      if(d.ekskul) S.stats.ekskul = d.ekskul;
+      if(d.mediaMode) S.mediaMode = d.mediaMode;
+      if(d.slideInt) S.slideInt = parseInt(d.slideInt)||5000;
+      if(d.theme !== undefined){ S.theme = d.theme; document.documentElement.setAttribute('data-theme', d.theme||''); }
+      // Restore slides (URL only)
+      if(d.slides){ try{ var sl=JSON.parse(d.slides); if(sl&&sl.length){ S.slides=sl; } }catch(e){} }
+      // Restore jam pelajaran
+      if(d.jamPelajaran){ try{ var jp=JSON.parse(d.jamPelajaran); if(jp&&jp.length){ S.jamPelajaran=jp; } }catch(e){} }
+      applyAll(); lsSave();
+      toast('Pengaturan disinkron dari Sheet','ok');
     }).catch(function(){});
-}
-
-function gsPush(type){
-  var payload={action:'set',type:type};
-  if(type==='guru') payload.data=S.guru.map(function(g){ return {id:g.id,hari:g.hari,nama:g.nama,jabatan:g.jabatan,photo:(g.photo&&g.photo.indexOf('http')===0)?g.photo:''}; });
-  else if(type==='ann') payload.data=S.ann.map(function(a){ return {id:a.id,teks:a.teks}; });
-  else if(type==='settings') payload.data={schoolName:S.school.name,tagline:S.school.tagline,tickerTop:S.tkTop,tickerBottom:S.tkBot,siswa:S.stats.siswa,guru:S.stats.guru,kelas:S.stats.kelas,ekskul:S.stats.ekskul};
-  gsReq(null,payload).catch(function(){});
 }
 
 function setStat(id,state,msg){
@@ -1345,13 +1478,22 @@ function doRestore(inp){
       if(d.jamPelajaran) S.jamPelajaran=d.jamPelajaran;
       if(d.mediaMode) S.mediaMode=d.mediaMode;
       if(d.slideInt) S.slideInt=d.slideInt;
+      if(d.slides) S.slides=d.slides;
       if(d.theme!==undefined){ S.theme=d.theme; document.documentElement.setAttribute('data-theme',d.theme||''); }
       applyAll(); syncUI(); renderGuruTbl(); renderAnnTbl(); renderJamTbl();
+      renderSlides(); renderSlideList();
+      saveAll();
       var ri=G('restInfo'); if(ri){ ri.style.display='block'; ri.innerHTML='\u2713 Restore dari: <strong>'+esc(inp.files[0].name)+'</strong><br>Dibuat: '+(d._ts?new Date(d._ts).toLocaleString('id-ID'):'-'); }
-      toast('Restore berhasil!','ok');
+      toast('Restore berhasil! Data disimpan.','ok');
     } catch(err){ toast('Gagal baca backup: '+err.message,'err'); }
   };
   reader.readAsText(inp.files[0]);
+}
+
+function clearLS(){
+  if(!confirm('Hapus semua cache lokal? Halaman akan reload dan kembali ke default.')) return;
+  try{ localStorage.removeItem(LS_KEY); } catch(e){}
+  location.reload();
 }
 
 function applyAll(){
@@ -1364,6 +1506,28 @@ function applyAll(){
 }
 
 // ═══════════════════════════════════════════
+//  APPS SCRIPT CODE VIEWER
+// ═══════════════════════════════════════════
+var GS_SCRIPT_CODE = '// ============================================================\n// Google Apps Script untuk TV Informasi SDN 1 RAJA\n// INSTRUKSI DEPLOY:\n// 1. Buka Google Sheets -> Ekstensi -> Apps Script\n// 2. Hapus kode lama, paste kode ini\n// 3. Klik Deploy -> New Deployment\n//    - Type: Web App\n//    - Execute as: Me\n//    - Who has access: Anyone\n// 4. Authorize -> Copy URL -> paste di GS_URL di HTML\n// ============================================================\n\nfunction doGet(e) {\n  var p = e.parameter;\n  var action = p.action || "";\n  var type   = p.type   || "";\n  var out = ContentService.createTextOutput();\n  out.setMimeType(ContentService.MimeType.JSON);\n  try {\n    if (action === "ping") {\n      var name = SpreadsheetApp.getActiveSpreadsheet().getName();\n      out.setContent(JSON.stringify({status:"ok", sheetName: name}));\n    }\n    else if (action === "get") {\n      out.setContent(JSON.stringify({status:"ok", data: getData(type)}));\n    }\n    else if (action === "set") {\n      var raw = p.data || "[]";\n      var data = JSON.parse(decodeURIComponent(raw));\n      setData(type, data);\n      out.setContent(JSON.stringify({status:"ok"}));\n    }\n    else {\n      out.setContent(JSON.stringify({status:"err", msg:"Unknown action"}));\n    }\n  } catch(err) {\n    out.setContent(JSON.stringify({status:"err", msg: err.message}));\n  }\n  return out;\n}\n\nfunction getSheet(name) {\n  var ss = SpreadsheetApp.getActiveSpreadsheet();\n  return ss.getSheetByName(name) || ss.insertSheet(name);\n}\n\nfunction getData(type) {\n  var sh = getSheet(type);\n  var rows = sh.getDataRange().getValues();\n  if (rows.length <= 1) return (type === "settings") ? {} : [];\n  var headers = rows[0];\n  if (type === "settings") {\n    var obj = {};\n    rows.slice(1).forEach(function(r){ if(r[0]) obj[String(r[0])] = String(r[1]||""); });\n    return obj;\n  }\n  return rows.slice(1).map(function(row) {\n    var o = {};\n    headers.forEach(function(h,i){ o[String(h)] = row[i] !== undefined ? String(row[i]) : ""; });\n    return o;\n  });\n}\n\nfunction setData(type, data) {\n  var sh = getSheet(type);\n  sh.clearContents();\n  if (!data) return;\n  if (type === "settings") {\n    sh.getRange(1,1,1,2).setValues([["key","value"]]);\n    var rows = Object.keys(data).map(function(k){ return [k, String(data[k]||"")]; });\n    if (rows.length) sh.getRange(2,1,rows.length,2).setValues(rows);\n    return;\n  }\n  if (!Array.isArray(data) || !data.length) return;\n  var headers = Object.keys(data[0]);\n  sh.getRange(1,1,1,headers.length).setValues([headers]);\n  var rows = data.map(function(obj){\n    return headers.map(function(h){ return obj[h] !== undefined ? String(obj[h]) : ""; });\n  });\n  sh.getRange(2,1,rows.length,headers.length).setValues(rows);\n}';
+
+function showGsCode(){
+  var box=G('gsCodeBox'); if(!box) return;
+  box.style.display='block';
+  var pre=G('gsCodePre'); if(pre) pre.textContent=GS_SCRIPT_CODE;
+  box.scrollIntoView({behavior:'smooth'});
+}
+function copyGsCode(){
+  navigator.clipboard.writeText(GS_SCRIPT_CODE)
+    .then(function(){ toast('Kode berhasil dicopy! Buka Apps Script dan paste.','ok'); })
+    .catch(function(){
+      var ta=document.createElement('textarea');
+      ta.value=GS_SCRIPT_CODE; document.body.appendChild(ta);
+      ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+      toast('Kode berhasil dicopy!','ok');
+    });
+}
+
+// ═══════════════════════════════════════════
 //  KEYBOARD & EVENTS
 // ═══════════════════════════════════════════
 document.addEventListener('keydown',function(e){ if(e.ctrlKey&&e.shiftKey&&e.key==='A'){ e.preventDefault(); openAdmin(); } });
@@ -1373,24 +1537,35 @@ G('editModal').addEventListener('click',function(e){ if(e.target===this) closeMo
 //  INIT
 // ═══════════════════════════════════════════
 window.addEventListener('load',function(){
-  // Set default logo
-  var li=G('logoImg');
-  if(li) li.src = LOGO_DEFAULT;
+  // 1. Load dari localStorage dulu (cepat, offline)
+  var fromLS = lsLoad();
 
+  // 2. Set logo default jika belum ada
+  var li=G('logoImg');
+  if(li) li.src = (S.school.logo && S.school.logo.length > 10) ? S.school.logo : LOGO_DEFAULT;
+
+  // 3. Apply semua state ke tampilan
   sortGuru();
-  renderAnnTV();
-  setMediaMode('slideshow');
+  applyAll();
+  setMediaMode(S.mediaMode||'slideshow');
   initTk('tkTop',S.tkTop,S.spTop);
   initTk('tkBot',S.tkBot,S.spBot);
+
+  // 4. Restore theme
+  if(S.theme) document.documentElement.setAttribute('data-theme',S.theme);
+
   requestAnimationFrame(tkFrame);
   tick();
 
-  // Auto-sync from Google Sheet on load
+  // 5. Auto-sync dari Google Sheet (update data terbaru)
+  //    Dilakukan setelah 3 detik agar tampilan sudah siap
   setTimeout(function(){
     syncGuru();
     setTimeout(syncAnn, 900);
     setTimeout(syncSettings, 1800);
-  }, 2000);
+  }, 3000);
+
+  if(fromLS) toast('Data dimuat dari cache lokal','info');
 });
 
 </script>
