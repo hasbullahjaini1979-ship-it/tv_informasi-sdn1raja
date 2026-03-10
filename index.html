@@ -68,19 +68,21 @@ body{font-family:'Nunito',sans-serif;color:var(--txt);}
 
 /* JAM PELAJARAN — di header tengah */
 .hdrjam{display:flex;flex-direction:column;align-items:center;justify-content:center;
-  gap:5px;padding:6px 16px;background:rgba(0,0,0,.25);border:1px solid var(--border);
-  border-radius:var(--rs);position:relative;overflow:hidden;min-width:220px;}
-.hdrjam::before{content:'';position:absolute;top:0;left:0;right:0;height:2.5px;background:var(--stripe);}
-.hdrjam-top{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;}
-.hdrjam-label{font-family:'Bebas Neue';font-size:18px;letter-spacing:2px;color:var(--c3);line-height:1;}
-.hdrjam-badge{font-family:'Bebas Neue';font-size:10px;letter-spacing:1.5px;padding:2px 9px;border-radius:20px;}
-.hdrjam-wkt{font-family:'Rajdhani';font-size:10px;color:var(--txt2);letter-spacing:.8px;text-align:center;}
+  gap:4px;padding:7px 20px;background:rgba(0,0,0,.3);border:1px solid var(--border);
+  border-radius:var(--rs);position:relative;overflow:hidden;min-width:260px;}
+.hdrjam::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--stripe);}
+.hdrjam-title{font-family:'Bebas Neue';font-size:10px;letter-spacing:3px;color:var(--txt3);margin-bottom:1px;}
+.hdrjam-top{display:flex;align-items:center;justify-content:center;gap:12px;width:100%;}
+.hdrjam-label{font-family:'Bebas Neue';font-size:38px;letter-spacing:3px;color:var(--c3);line-height:1;
+  text-shadow:0 0 16px rgba(245,196,0,.4);}
+.hdrjam-badge{font-family:'Bebas Neue';font-size:11px;letter-spacing:1.5px;padding:3px 10px;border-radius:20px;}
+.hdrjam-wkt{font-family:'Rajdhani';font-size:11px;color:var(--txt2);letter-spacing:1px;text-align:center;font-weight:600;}
 /* Countdown row in header */
-.hdrcd{display:flex;align-items:center;gap:8px;width:100%;}
-.hdrcd-lbl{font-family:'Rajdhani';font-size:9px;color:var(--txt3);letter-spacing:.8px;white-space:nowrap;}
-.hdrcd-wrap{flex:1;height:4px;background:rgba(255,255,255,.08);border-radius:3px;overflow:hidden;}
+.hdrcd{display:flex;align-items:center;gap:8px;width:100%;margin-top:3px;}
+.hdrcd-lbl{font-family:'Bebas Neue';font-size:20px;color:var(--txt2);letter-spacing:1px;white-space:nowrap;}
+.hdrcd-wrap{flex:1;height:6px;background:rgba(255,255,255,.08);border-radius:3px;overflow:hidden;}
 .hdrcd-bar{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--c2),var(--c3));transition:width .5s;}
-.hdrcd-num{font-family:'Bebas Neue';font-size:15px;color:var(--c3);letter-spacing:1px;white-space:nowrap;min-width:62px;text-align:right;}
+.hdrcd-num{font-family:'Bebas Neue';font-size:26px;color:var(--c3);letter-spacing:2px;white-space:nowrap;min-width:90px;text-align:right;text-shadow:0 0 12px rgba(245,196,0,.4);line-height:1;}
 
 /* MEDIA */
 .media{background:#000;border:1px solid var(--border);border-radius:var(--r);overflow:hidden;position:relative;min-height:0;}
@@ -146,7 +148,13 @@ body{font-family:'Nunito',sans-serif;color:var(--txt);}
 .cdbar{height:100%;border-radius:3px;transition:width .5s;background:linear-gradient(90deg,var(--c2),var(--c3));}
 .cdnum{font-family:'Bebas Neue';font-size:14px;color:var(--c3);letter-spacing:1px;white-space:nowrap;min-width:38px;text-align:right;}
 
-/* STATS */
+/* GURU TICKER — running teks tugas guru piket */
+.gurutk{overflow:hidden;height:22px;display:flex;align-items:center;margin-top:5px;
+  background:rgba(26,110,181,.1);border:1px solid rgba(26,110,181,.2);border-radius:20px;position:relative;}
+.gurutk-lbl{flex-shrink:0;padding:0 9px;font-family:'Bebas Neue';font-size:9px;letter-spacing:1.5px;
+  color:var(--c2l);background:rgba(26,110,181,.2);height:100%;display:flex;align-items:center;border-radius:20px 0 0 20px;}
+.gurutk-track{flex:1;overflow:hidden;height:100%;position:relative;}
+.gurutk-text{display:inline-block;white-space:nowrap;font-family:'Rajdhani';font-size:11px;font-weight:600;color:var(--txt2);position:absolute;left:0;}
 .sgrid{display:grid;grid-template-columns:1fr 1fr;gap:6px;flex-shrink:0;}
 .sbox{background:rgba(0,0,0,.28);border:1px solid var(--border);border-radius:var(--rs);
   padding:7px;text-align:center;position:relative;overflow:hidden;}
@@ -297,6 +305,7 @@ input[type=file]::-webkit-file-upload-button{background:rgba(245,196,0,.12);bord
       </div>
       <!-- Tengah: Jam Pelajaran -->
       <div class="hdrjam">
+        <div class="hdrjam-title">🕐 JAM PELAJARAN</div>
         <div class="hdrjam-top">
           <div class="hdrjam-label" id="jamLabel">Memuat...</div>
           <span class="hdrjam-badge jb-kbm" id="jamBadge">KBM</span>
@@ -320,17 +329,37 @@ input[type=file]::-webkit-file-upload-button{background:rgba(245,196,0,.12);bord
         <div class="slide on"><div class="noslide"><div style="font-size:44px;opacity:.3">🖼</div><div>Tambahkan foto melalui Admin</div></div></div>
         <div class="sdots" id="sdots"></div>
       </div>
-      <div id="vidWrap"><video id="vidEl" autoplay muted loop playsinline><source id="vidSrc" src="" type="video/mp4"></video></div>
+      <div id="vidWrap">
+        <video id="vidEl" autoplay muted loop playsinline style="width:100%;height:100%;object-fit:contain;display:none"><source id="vidSrc" src="" type="video/mp4"></video>
+        <iframe id="ytFrame" style="display:none;width:100%;height:100%;border:none"
+          allow="autoplay; encrypted-media; picture-in-picture"
+          allowfullscreen sandbox="allow-scripts allow-same-origin allow-presentation allow-popups"></iframe>
+        <div id="ytFallback" style="display:none;width:100%;height:100%;position:relative;cursor:pointer;background:#000" onclick="openYtExternal()">
+          <img id="ytThumb" src="" alt="" style="width:100%;height:100%;object-fit:cover;opacity:.7">
+          <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:rgba(0,0,0,.5)">
+            <div style="width:72px;height:72px;background:rgba(255,0,0,.9);border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 0 30px rgba(255,0,0,.5)">
+              <div style="width:0;height:0;border-style:solid;border-width:14px 0 14px 28px;border-color:transparent transparent transparent #fff;margin-left:6px"></div>
+            </div>
+            <div style="font-family:'Bebas Neue';font-size:20px;letter-spacing:3px;color:#fff;text-shadow:0 2px 8px rgba(0,0,0,.8)" id="ytFallbackTitle">VIDEO YOUTUBE</div>
+            <div style="font-family:'Rajdhani';font-size:12px;color:rgba(255,255,255,.7);letter-spacing:1px;background:rgba(255,0,0,.8);padding:4px 16px;border-radius:20px">▶ KLIK UNTUK BUKA DI YOUTUBE</div>
+            <div style="font-family:'Rajdhani';font-size:10px;color:rgba(255,255,255,.45);letter-spacing:1px" id="ytFallbackNote">Video ini tidak mengizinkan embed langsung</div>
+          </div>
+        </div>
+      </div>
     </div>
     <div class="sidebar">
       <div class="pnl">
         <div class="pt">👨‍🏫 GURU PIKET HARI INI</div>
         <div class="gscroll" id="guruScroll">
           <div class="gcard">
-            <div class="gavatar"><span style="font-size:26px;opacity:.6">👤</span></div>
+            <div class="gavatar"><span style="font-size:30px;opacity:.6">👤</span></div>
             <div class="gname">Belum diatur</div>
             <div class="grole">—</div>
           </div>
+        </div>
+        <div class="gurutk">
+          <span class="gurutk-lbl">📋 TUGAS</span>
+          <div class="gurutk-track"><div class="gurutk-text" id="guruTkText">Memimpin doa pembuka &bull; Mengabsen kehadiran siswa &bull; Menjaga ketertiban kelas &bull; Membantu siswa yang kesulitan &bull; Mencatat siswa tidak hadir &bull; Memastikan kebersihan kelas &bull;</div></div>
         </div>
       </div>
       <div class="sgrid">
@@ -421,7 +450,13 @@ input[type=file]::-webkit-file-upload-button{background:rgba(245,196,0,.12);bord
         <div class="fr"><label>Kecepatan</label><select id="iSpB"><option value="20">Sangat Cepat</option><option value="35" selected>Cepat</option><option value="50">Normal</option><option value="70">Lambat</option></select></div>
       </div>
     </div>
-    <div class="brow" style="margin-top:12px"><button class="btn by" onclick="saveRunText()">💾 SIMPAN &amp; TERAPKAN</button></div>
+    <div class="asec w" style="margin-top:12px">
+      <div class="stl" style="color:#90ffb0">📋 Running Teks Tugas Guru Piket</div>
+      <div class="fr"><label>Isi Teks Tugas (pisah dengan &bull; atau tanda lainnya)</label><textarea id="iTkGuru" rows="3" placeholder="Memimpin doa pembuka &bull; Mengabsen kehadiran siswa &bull; ..."></textarea></div>
+      <div class="fr"><label>Kecepatan</label><select id="iSpGuru"><option value="20">Sangat Cepat</option><option value="30">Cepat</option><option value="45" selected>Normal</option><option value="65">Lambat</option></select></div>
+      <div class="brow"><button class="btn bg" onclick="saveGuruTk()">💾 SIMPAN TUGAS</button></div>
+    </div>
+    <div class="brow" style="margin-top:12px"><button class="btn by" onclick="saveRunText()">💾 SIMPAN BAR ATAS &amp; BAWAH</button></div>
   </div>
 
   <div class="tc" id="tcGu">
@@ -502,10 +537,22 @@ input[type=file]::-webkit-file-upload-button{background:rgba(245,196,0,.12);bord
     </div>
     <div id="vidAdm" style="display:none">
       <div class="asec w">
-        <div class="stl">Video</div>
-        <div class="fr"><label>Upload File Video (MP4)</label><input type="file" id="iVidF" accept="video/*" onchange="loadVid(this)"></div>
-        <div class="fr"><label>— Atau URL Langsung (.mp4) —</label><input type="text" id="iVidU" placeholder="https://..."></div>
+        <div class="stl">Video / YouTube</div>
+        <div class="binf bi-r" style="margin-bottom:10px">
+          ⚠️ <strong>Beberapa video YouTube sengaja diblokir embed oleh pemiliknya</strong> (Error 153). Jika terjadi, akan tampil thumbnail + tombol buka di YouTube. Gunakan video yang memang mengizinkan embed, atau upload file MP4 langsung.
+        </div>
+        <div class="fr"><label>URL YouTube / MP4 Langsung</label><input type="text" id="iVidU" placeholder="https://www.youtube.com/watch?v=... atau https://.../video.mp4"></div>
+        <div class="fr"><label>— Atau Upload File MP4 (tidak terbatas embed) —</label><input type="file" id="iVidF" accept="video/*" onchange="loadVid(this)"></div>
         <div class="brow"><button class="btn by" onclick="applyVidUrl()">▶ TERAPKAN</button></div>
+        <div style="margin-top:10px;padding:9px 12px;background:rgba(245,196,0,.06);border:1px solid rgba(245,196,0,.15);border-radius:var(--rs)">
+          <div style="font-family:'Bebas Neue';font-size:10px;letter-spacing:2px;color:var(--c3);margin-bottom:5px">💡 TIPS VIDEO YANG BISA DIEMBED</div>
+          <div style="font-size:10px;color:var(--txt2);line-height:1.8;font-family:'Nunito'">
+            • Video dari channel resmi pemerintah/sekolah biasanya bisa diembed<br>
+            • Upload video ke YouTube sendiri → Setting → <strong>Izinkan penyematan</strong> = ON<br>
+            • Atau upload file MP4 langsung — tidak ada batasan embed<br>
+            • Google Drive: upload .mp4 → share "siapa saja" → copy link
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -606,7 +653,8 @@ var S = {
   stats: {siswa:'--', guru:'--', kelas:'--', ekskul:'--'},
   tkTop: 'Selamat Datang di SDN 1 RAJA \u2756 Berakhlak Berprestasi \u2756 Semangat Belajar Meraih Prestasi Terbaik \u2756',
   tkBot: 'Informasi Terkini Sekolah \u2756 Tetap Semangat dan Disiplin \u2756 Bersama Meraih Prestasi Terbaik \u2756',
-  spTop:30, spBot:35,
+  tkGuru: 'Memimpin doa pembuka \u2756 Mengabsen kehadiran siswa \u2756 Menjaga ketertiban kelas \u2756 Membantu siswa yang kesulitan \u2756 Mencatat siswa tidak hadir \u2756 Memastikan kebersihan kelas \u2756',
+  spTop:30, spBot:35, spGuru:45,
   guru: [],
   ann: [
     {id:'a1', teks:'Peserta didik diharapkan hadir tepat waktu'},
@@ -625,6 +673,7 @@ var S = {
     {id:'j9', label:'Pulang',     start:'11:25', end:'23:59', tipe:'pulang'}
   ],
   theme: '',
+  vidUrl: '',
   _eType:null, _eId:null
 };
 
@@ -733,8 +782,32 @@ function tkFrame(ts){
 }
 
 // ═══════════════════════════════════════════
-//  JAM PELAJARAN
+//  GURU TICKER (running teks tugas piket)
 // ═══════════════════════════════════════════
+var gTk={pos:null,spd:0}, _lgts=null;
+
+function initGuruTk(){
+  var el=G('guruTkText'); if(!el) return;
+  el.textContent = S.tkGuru;
+  setTimeout(function(){
+    var pw=el.parentElement?el.parentElement.offsetWidth:200;
+    var ew=el.offsetWidth||400;
+    gTk.pos=pw; gTk.spd=(ew+pw)/(S.spGuru||45);
+    el.style.left=pw+'px';
+  },300);
+}
+
+function guruTkFrame(ts){
+  if(!_lgts) _lgts=ts;
+  var dt=Math.min((ts-_lgts)/1000,0.1); _lgts=ts;
+  var el=G('guruTkText');
+  if(el&&gTk.pos!==null){
+    gTk.pos-=gTk.spd*dt;
+    if(gTk.pos<-(el.offsetWidth+10)){ var pw=el.parentElement?el.parentElement.offsetWidth:200; gTk.pos=pw; }
+    el.style.left=Math.round(gTk.pos)+'px';
+  }
+  requestAnimationFrame(guruTkFrame);
+}
 function t2m(t){ var p=t.split(':'); return parseInt(p[0])*60+parseInt(p[1]); }
 
 function updateJam(d){
@@ -1028,8 +1101,8 @@ function showTab(btn,id){
 
 function syncUI(){
   sv('iName',S.school.name); sv('iTag',S.school.tagline);
-  sv('iTkT',S.tkTop); sv('iTkB',S.tkBot);
-  sv('iSpT',S.spTop); sv('iSpB',S.spBot);
+  sv('iTkT',S.tkTop); sv('iTkB',S.tkBot); sv('iTkGuru',S.tkGuru);
+  sv('iSpT',S.spTop); sv('iSpB',S.spBot); sv('iSpGuru',S.spGuru);
   sv('iMMode',S.mediaMode); sv('iSlInt',S.slideInt);
   sv('iSiswa',S.stats.siswa==='--'?'':S.stats.siswa);
   sv('iGuruN',S.stats.guru==='--'?'':S.stats.guru);
@@ -1074,6 +1147,15 @@ function saveRunText(){
   S.spTop = parseInt(gv('iSpT'))||30; S.spBot = parseInt(gv('iSpB'))||35;
   initTk('tkTop',S.tkTop,S.spTop); initTk('tkBot',S.tkBot,S.spBot);
   saveAll(); toast('Running text diperbarui','ok');
+}
+
+function saveGuruTk(){
+  var t = gv('iTkGuru').trim();
+  if(!t){ toast('Teks tidak boleh kosong!','err'); return; }
+  S.tkGuru = t;
+  S.spGuru = parseInt(gv('iSpGuru'))||45;
+  initGuruTk();
+  saveAll(); toast('Teks tugas guru piket disimpan','ok');
 }
 
 // ═══════════════════════════════════════════
@@ -1224,23 +1306,154 @@ function modalSave(){
 function closeModal(){ G('editModal').classList.remove('show'); S._eType=null; S._eId=null; }
 
 // ═══════════════════════════════════════════
-//  MEDIA
+//  MEDIA — YouTube + MP4 support
 // ═══════════════════════════════════════════
-function changeMode(m){ S.mediaMode=m; G('slideAdm').style.display=m==='slideshow'?'block':'none'; G('vidAdm').style.display=m==='video'?'block':'none'; setMediaMode(m); }
+// ═══════════════════════════════════════════
+//  MEDIA — YouTube + MP4 + Fallback
+// ═══════════════════════════════════════════
+function ytId(url){
+  var m = url.match(/(?:v=|youtu\.be\/|embed\/|shorts\/)([a-zA-Z0-9_-]{11})/);
+  return m ? m[1] : null;
+}
+
+var _ytErrTimer = null;
+var _ytCurrentUrl = '';
+
+// Listen pesan dari YouTube iframe (error, state changes)
+window.addEventListener('message', function(e){
+  try {
+    var d = typeof e.data === 'string' ? JSON.parse(e.data) : e.data;
+    if(!d || d.event !== 'infoDelivery') return;
+    // Error state dari YouTube: -1=unstarted, 0=ended, 1=playing, 2=paused, 3=buffering, 5=video cued
+    if(d.info && d.info.playerState !== undefined){
+      if(_ytErrTimer){ clearTimeout(_ytErrTimer); _ytErrTimer=null; }
+    }
+  } catch(err){}
+});
+
+function showYtFallback(yid, url){
+  var frm = G('ytFrame'), fb = G('ytFallback'), lbl = G('liveLbl');
+  if(frm){ frm.style.display='none'; frm.src='about:blank'; }
+  if(fb){
+    fb.style.display='block';
+    // Tampilkan thumbnail YouTube
+    var th = G('ytThumb');
+    if(th) th.src = 'https://img.youtube.com/vi/'+yid+'/maxresdefault.jpg';
+    var ttl = G('ytFallbackTitle');
+    if(ttl) ttl.textContent = 'VIDEO YOUTUBE';
+    var note = G('ytFallbackNote');
+    if(note) note.textContent = 'Video ini tidak mengizinkan diputar di sini (Error 153)';
+    fb.setAttribute('data-yturl', url);
+  }
+  if(lbl) lbl.textContent = 'YOUTUBE';
+}
+
+function openYtExternal(){
+  var fb = G('ytFallback');
+  if(fb){ var u = fb.getAttribute('data-yturl'); if(u) window.open(u, '_blank'); }
+}
+
+function applyVidSrc(url){
+  if(!url) return;
+  _ytCurrentUrl = url;
+  var vid=G('vidEl'), frm=G('ytFrame'), fb=G('ytFallback'), lbl=G('liveLbl');
+  var yid = ytId(url);
+
+  // Reset semua
+  if(fb) fb.style.display='none';
+
+  if(yid){
+    var embedUrl = 'https://www.youtube-nocookie.com/embed/' + yid
+      + '?autoplay=1&mute=1&loop=1&playlist=' + yid
+      + '&controls=1&rel=0&enablejsapi=1&widgetid=1';
+
+    if(vid) vid.style.display='none';
+    if(fb) fb.style.display='none';
+
+    if(frm){
+      frm.style.display='block';
+      frm.src = 'about:blank';
+
+      // Set timeout fallback — jika iframe gagal load dalam 8 detik, tampilkan fallback
+      if(_ytErrTimer) clearTimeout(_ytErrTimer);
+      _ytErrTimer = setTimeout(function(){
+        // Cek apakah iframe berhasil load dengan mencoba akses contentDocument
+        var blocked = false;
+        try {
+          // Jika bisa akses contentDocument dan ada error UI, berarti diblokir
+          var doc = frm.contentDocument || frm.contentWindow.document;
+          var body = doc.body ? doc.body.innerHTML : '';
+          if(body.indexOf('errorScreen') > -1 || body.length < 100) blocked = true;
+        } catch(e){
+          // Cross-origin = iframe loaded (normal) atau blocked
+          blocked = false; // Jika throw CORS error = iframe loaded OK
+        }
+        if(blocked) showYtFallback(yid, url);
+      }, 8000);
+
+      setTimeout(function(){ frm.src = embedUrl; }, 150);
+    }
+    if(lbl) lbl.textContent = 'YOUTUBE';
+
+    // Deteksi error via onerror iframe (tidak selalu work karena CORS)
+    frm.onerror = function(){ showYtFallback(yid, url); };
+
+  } else {
+    // Direct MP4 / video URL
+    if(frm){ frm.style.display='none'; frm.src='about:blank'; }
+    if(fb) fb.style.display='none';
+    if(vid){
+      vid.style.display='block';
+      var s=G('vidSrc'); if(s) s.src=toDirectUrl(url);
+      vid.load(); vid.play().catch(function(){});
+    }
+    if(lbl) lbl.textContent='VIDEO';
+  }
+}
+
+function changeMode(m){
+  S.mediaMode=m;
+  G('slideAdm').style.display=m==='slideshow'?'block':'none';
+  G('vidAdm').style.display=m==='video'?'block':'none';
+  setMediaMode(m);
+}
+
 function addSlides(inp){
   var files=Array.from(inp.files), done=0;
   S.slideInt=parseInt(gv('iSlInt'))||5000;
-  files.forEach(function(f){ readFile(f,function(url){ S.slides.push({name:f.name,url:url}); done++; if(done===files.length){ renderSlides(); renderSlideList(); lsSave(); toast(files.length+' foto ditambahkan','ok'); } }); });
+  files.forEach(function(f){
+    readFile(f,function(url){
+      S.slides.push({name:f.name,url:url});
+      done++;
+      if(done===files.length){ renderSlides(); renderSlideList(); lsSave(); toast(files.length+' foto ditambahkan','ok'); }
+    });
+  });
 }
+
 function addSlideUrl(){
   var raw=gv('iSlUrl').trim(); if(!raw){ toast('Masukkan URL foto!','err'); return; }
   S.slides.push({name:'URL foto', url:toDirectUrl(raw)});
   S.slideInt=parseInt(gv('iSlInt'))||5000;
   renderSlides(); renderSlideList(); sv('iSlUrl',''); saveAll(); toast('URL foto ditambahkan','ok');
 }
+
 function delSlide(i){ S.slides.splice(i,1); renderSlides(); renderSlideList(); saveAll(); toast('Foto dihapus','ok'); }
-function loadVid(inp){ if(inp.files&&inp.files[0]){ var u=URL.createObjectURL(inp.files[0]); var v=G('vidEl'),s=G('vidSrc'); if(s) s.src=u; if(v){v.load();v.play();} toast('Video dimuat','ok'); } }
-function applyVidUrl(){ var u=gv('iVidU').trim(); if(!u) return; var v=G('vidEl'),s=G('vidSrc'); if(s) s.src=toDirectUrl(u); if(v){v.load();v.play();} toast('URL video diterapkan','ok'); }
+
+function loadVid(inp){
+  if(inp.files&&inp.files[0]){
+    var u=URL.createObjectURL(inp.files[0]);
+    applyVidSrc(u);
+    toast('Video dimuat','ok');
+  }
+}
+
+function applyVidUrl(){
+  var u=gv('iVidU').trim(); if(!u){ toast('Masukkan URL video atau YouTube!','err'); return; }
+  S.vidUrl = u;
+  applyVidSrc(u);
+  saveAll();
+  toast('Video diterapkan','ok');
+}
 
 // ═══════════════════════════════════════════
 //  THEME
@@ -1261,13 +1474,15 @@ function lsSave(){
     var snap = {
       school: S.school,
       stats: S.stats,
-      tkTop: S.tkTop, tkBot: S.tkBot, spTop: S.spTop, spBot: S.spBot,
+      tkTop: S.tkTop, tkBot: S.tkBot, tkGuru: S.tkGuru,
+      spTop: S.spTop, spBot: S.spBot, spGuru: S.spGuru,
       guru: S.guru,
       ann: S.ann,
       jamPelajaran: S.jamPelajaran,
       mediaMode: S.mediaMode,
       slides: S.slides.filter(function(s){ return s.url && s.url.indexOf('http')===0; }), // hanya simpan URL, bukan base64
       slideInt: S.slideInt,
+      vidUrl: S.vidUrl,
       theme: S.theme
     };
     localStorage.setItem(LS_KEY, JSON.stringify(snap));
@@ -1283,14 +1498,17 @@ function lsLoad(){
     if(d.stats) S.stats = d.stats;
     if(d.tkTop) S.tkTop = d.tkTop;
     if(d.tkBot) S.tkBot = d.tkBot;
+    if(d.tkGuru) S.tkGuru = d.tkGuru;
     if(d.spTop) S.spTop = d.spTop;
     if(d.spBot) S.spBot = d.spBot;
+    if(d.spGuru) S.spGuru = d.spGuru;
     if(d.guru) S.guru = d.guru;
     if(d.ann) S.ann = d.ann;
     if(d.jamPelajaran) S.jamPelajaran = d.jamPelajaran;
     if(d.mediaMode) S.mediaMode = d.mediaMode;
     if(d.slides) S.slides = d.slides;
     if(d.slideInt) S.slideInt = d.slideInt;
+    if(d.vidUrl) S.vidUrl = d.vidUrl;
     if(d.theme !== undefined){ S.theme = d.theme; document.documentElement.setAttribute('data-theme', d.theme||''); }
     return true;
   } catch(e){ return false; }
@@ -1330,10 +1548,10 @@ function gsPushBg(type){
       data = {
         schoolName:S.school.name, tagline:S.school.tagline,
         logo: S.school.logo && S.school.logo.indexOf('http')===0 ? S.school.logo : '',
-        tickerTop:S.tkTop, tickerBottom:S.tkBot,
-        spTop:String(S.spTop), spBot:String(S.spBot),
+        tickerTop:S.tkTop, tickerBottom:S.tkBot, tickerGuru:S.tkGuru,
+        spTop:String(S.spTop), spBot:String(S.spBot), spGuru:String(S.spGuru),
         siswa:S.stats.siswa, guru:S.stats.guru, kelas:S.stats.kelas, ekskul:S.stats.ekskul,
-        mediaMode:S.mediaMode, slideInt:String(S.slideInt), theme:S.theme,
+        mediaMode:S.mediaMode, slideInt:String(S.slideInt), theme:S.theme, vidUrl:S.vidUrl||'',
         slides: JSON.stringify(S.slides.filter(function(s){ return s.url&&s.url.indexOf('http')===0; })),
         jamPelajaran: JSON.stringify(S.jamPelajaran)
       };
@@ -1380,26 +1598,25 @@ function gsPushAll(){
   toast('Data dikirim ke Sheet...','info');
 }
 
-function syncGuru(){
+function syncGuru(silent){
   var sp=G('gSpin'); if(sp) sp.style.display='inline-block';
   gsGet('action=get&type=guru')
     .then(function(r){
       if(sp) sp.style.display='none';
-      if(!r||r.status!=='ok'){ toast('Sync guru gagal: '+(r&&r.msg||'error'),'err'); return; }
+      if(!r||r.status!=='ok'){ if(!silent) toast('Sync guru gagal: '+(r&&r.msg||'error'),'err'); return; }
       var rows = r.data||[];
-      if(!rows.length){ toast('Sheet guru masih kosong','info'); return; }
-      // Replace semua data guru dari sheet
+      if(!rows.length){ if(!silent) toast('Sheet guru masih kosong','info'); return; }
       S.guru = rows.map(function(g){
         return {id:g.id||'g'+Date.now()+Math.random(), hari:g.hari||'Senin', nama:g.nama||'', jabatan:g.jabatan||'Guru Kelas', photo:g.photo||null};
       });
       sortGuru(); renderGuruTbl(); renderGuruTV();
       lsSave();
       setStat('guruStat','ok','\u2713 '+S.guru.length+' guru disinkron dari Sheet');
-      toast(S.guru.length+' guru berhasil disinkron','ok');
-    }).catch(function(e){ if(sp) sp.style.display='none'; toast('Sync guru error: '+e.message,'err'); });
+      if(!silent) toast(S.guru.length+' guru berhasil disinkron','ok');
+    }).catch(function(e){ if(sp) sp.style.display='none'; if(!silent) toast('Sync guru error: '+e.message,'err'); });
 }
 
-function syncAnn(){
+function syncAnn(silent){
   gsGet('action=get&type=ann')
     .then(function(r){
       if(!r||r.status!=='ok') return;
@@ -1407,11 +1624,11 @@ function syncAnn(){
       if(!rows.length) return;
       S.ann = rows.map(function(a){ return {id:a.id||'a'+Date.now(), teks:a.teks||''}; });
       renderAnnTV(); renderAnnTbl(); lsSave();
-      toast('Pengumuman disinkron ('+S.ann.length+')','ok');
+      if(!silent) toast('Pengumuman disinkron ('+S.ann.length+')','ok');
     }).catch(function(){});
 }
 
-function syncSettings(){
+function syncSettings(silent){
   gsGet('action=get&type=settings')
     .then(function(r){
       if(!r||r.status!=='ok') return;
@@ -1421,8 +1638,10 @@ function syncSettings(){
       if(d.logo) S.school.logo = d.logo;
       if(d.tickerTop) S.tkTop = d.tickerTop;
       if(d.tickerBottom) S.tkBot = d.tickerBottom;
+      if(d.tickerGuru) S.tkGuru = d.tickerGuru;
       if(d.spTop) S.spTop = parseInt(d.spTop)||30;
       if(d.spBot) S.spBot = parseInt(d.spBot)||35;
+      if(d.spGuru) S.spGuru = parseInt(d.spGuru)||45;
       if(d.siswa) S.stats.siswa = d.siswa;
       if(d.guru) S.stats.guru = d.guru;
       if(d.kelas) S.stats.kelas = d.kelas;
@@ -1430,12 +1649,14 @@ function syncSettings(){
       if(d.mediaMode) S.mediaMode = d.mediaMode;
       if(d.slideInt) S.slideInt = parseInt(d.slideInt)||5000;
       if(d.theme !== undefined){ S.theme = d.theme; document.documentElement.setAttribute('data-theme', d.theme||''); }
-      // Restore slides (URL only)
       if(d.slides){ try{ var sl=JSON.parse(d.slides); if(sl&&sl.length){ S.slides=sl; } }catch(e){} }
-      // Restore jam pelajaran
       if(d.jamPelajaran){ try{ var jp=JSON.parse(d.jamPelajaran); if(jp&&jp.length){ S.jamPelajaran=jp; } }catch(e){} }
-      applyAll(); lsSave();
-      toast('Pengaturan disinkron dari Sheet','ok');
+      if(d.vidUrl) S.vidUrl = d.vidUrl;
+      applyAll();
+      // Apply video jika ada
+      if(S.vidUrl) applyVidSrc(S.vidUrl);
+      lsSave();
+      if(!silent) toast('Pengaturan disinkron dari Sheet','ok');
     }).catch(function(){});
 }
 
@@ -1498,11 +1719,13 @@ function clearLS(){
 
 function applyAll(){
   G('tvName').textContent=S.school.name; G('tvTag').innerHTML=S.school.tagline;
-  if(S.school.logo){ var li=G('logoImg'); if(li) li.src=S.school.logo; }
+  if(S.school.logo && S.school.logo.length>10){ var li=G('logoImg'); if(li) li.src=S.school.logo; }
   G('svSiswa').textContent=S.stats.siswa; G('svGuru').textContent=S.stats.guru;
   G('svKelas').textContent=S.stats.kelas; G('svEkskul').textContent=S.stats.ekskul;
   initTk('tkTop',S.tkTop,S.spTop); initTk('tkBot',S.tkBot,S.spBot);
+  initGuruTk();
   renderAnnTV(); sortGuru(); renderGuruTV();
+  if(S.mediaMode==='video' && S.vidUrl) applyVidSrc(S.vidUrl);
 }
 
 // ═══════════════════════════════════════════
@@ -1537,10 +1760,10 @@ G('editModal').addEventListener('click',function(e){ if(e.target===this) closeMo
 //  INIT
 // ═══════════════════════════════════════════
 window.addEventListener('load',function(){
-  // 1. Load dari localStorage dulu (cepat, offline)
-  var fromLS = lsLoad();
+  // 1. Load dari localStorage dulu (langsung tampil, tidak perlu koneksi)
+  lsLoad();
 
-  // 2. Set logo default jika belum ada
+  // 2. Set logo
   var li=G('logoImg');
   if(li) li.src = (S.school.logo && S.school.logo.length > 10) ? S.school.logo : LOGO_DEFAULT;
 
@@ -1551,21 +1774,21 @@ window.addEventListener('load',function(){
   initTk('tkTop',S.tkTop,S.spTop);
   initTk('tkBot',S.tkBot,S.spBot);
 
-  // 4. Restore theme
+  // 4. Theme
   if(S.theme) document.documentElement.setAttribute('data-theme',S.theme);
 
   requestAnimationFrame(tkFrame);
+  requestAnimationFrame(guruTkFrame);
   tick();
 
-  // 5. Auto-sync dari Google Sheet (update data terbaru)
-  //    Dilakukan setelah 3 detik agar tampilan sudah siap
+  // 5. AUTO-SYNC dari Google Sheet setiap kali halaman dibuka / di-refresh
+  //    Data sheet selalu diutamakan (override localStorage)
+  toast('Mengambil data dari Sheet...','info');
   setTimeout(function(){
-    syncGuru();
-    setTimeout(syncAnn, 900);
-    setTimeout(syncSettings, 1800);
-  }, 3000);
-
-  if(fromLS) toast('Data dimuat dari cache lokal','info');
+    syncGuru(true);
+    setTimeout(function(){ syncAnn(true); }, 700);
+    setTimeout(function(){ syncSettings(true); }, 1400);
+  }, 1500);
 });
 
 </script>
