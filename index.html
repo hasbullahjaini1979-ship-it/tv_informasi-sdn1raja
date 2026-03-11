@@ -337,9 +337,9 @@ body{font-family:'Nunito',sans-serif;color:var(--txt);}
 }
 @keyframes annPulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.4;transform:scale(.7);}}
 
-/* Slide area — fixed height, items slide in/out */
+/* Slide area — fixed height, items controlled fully via inline style from JS */
 .ann-overlay-progress{height:2px;background:rgba(255,255,255,.08);}
-.ann-progress-bar{height:100%;background:linear-gradient(90deg,var(--c2),var(--c3));width:100%;transform-origin:left;}
+.ann-progress-bar{height:100%;background:linear-gradient(90deg,var(--c2),var(--c3));width:0%;}
 .ann-overlay-body{
   height:42px;position:relative;overflow:hidden;
 }
@@ -349,16 +349,9 @@ body{font-family:'Nunito',sans-serif;color:var(--txt);}
   padding:0 12px;
   font-family:'Rajdhani';font-size:13px;font-weight:600;
   color:rgba(255,255,255,.92);line-height:1.4;
-  /* start hidden below */
+  /* default hidden below — JS controls all transitions */
   transform:translateY(100%);
   opacity:0;
-  transition:transform .55s cubic-bezier(.22,.68,0,1.2), opacity .4s ease;
-}
-.ann-slide-item.ann-active{
-  transform:translateY(0);opacity:1;
-}
-.ann-slide-item.ann-exit{
-  transform:translateY(-100%);opacity:0;
 }
 
 /* FAB */
@@ -1267,92 +1260,125 @@ function setMediaMode(m){
 }
 
 // ═══════════════════════════════════════════
-//  PENGUMUMAN DISPLAY
+//  PENGUMUMAN OVERLAY — robust infinite rotator
 // ═══════════════════════════════════════════
-// ═══════════════════════════════════════════
-//  PENGUMUMAN OVERLAY — animated slide rotator
-// ═══════════════════════════════════════════
-var _annIdx = 0, _annTimer = null;
+var _annIdx = 0, _annTimer = null, _annBusy = false;
+var ANN_DURATION = 4500; // ms per item
 
 function renderAnnTV(){
-  // Rebuild the items array for the rotator from S.ann
   var body = G('annOverlayBody'); if(!body) return;
-  body.innerHTML = '';
 
-  var items = S.ann && S.ann.length
-    ? S.ann.map(function(a){ return esc(a.teks); })
+  // Stop existing timer
+  if(_annTimer){ clearInterval(_annTimer); _annTimer = null; }
+  _annBusy = false;
+
+  // Build items list (up to 10)
+  var rawItems = (S.ann && S.ann.length)
+    ? S.ann.slice(0, 10).map(function(a){ return a.teks || ''; }).filter(Boolean)
     : ['Belum ada pengumuman'];
 
-  items.forEach(function(txt, i){
+  // Wipe and rebuild DOM — all items stacked, only first visible
+  body.innerHTML = '';
+  rawItems.forEach(function(txt, i){
     var div = document.createElement('div');
-    div.className = 'ann-slide-item' + (i===0 ? ' ann-active' : '');
+    div.className = 'ann-slide-item';
+    // Force initial state via style (no class dependency for hidden state)
+    div.style.cssText = 'transform:translateY(100%);opacity:0;transition:none;';
     div.textContent = txt;
     body.appendChild(div);
   });
 
   _annIdx = 0;
-  _annUpdateCounter(1, items.length);
-  _annStartProgress(items.length > 1 ? 4500 : 0);
-  if(_annTimer) clearInterval(_annTimer);
-  if(items.length > 1){
-    _annTimer = setInterval(function(){ _annRotate(); }, 4500);
+  // Show first item immediately
+  var first = body.querySelectorAll('.ann-slide-item')[0];
+  if(first){
+    // Use rAF to let paint happen before enabling transitions
+    requestAnimationFrame(function(){
+      first.style.transition = 'transform .55s cubic-bezier(.22,.68,0,1.2), opacity .4s ease';
+      first.style.transform  = 'translateY(0)';
+      first.style.opacity    = '1';
+    });
   }
+
+  _annUpdateCounter(1, rawItems.length);
+  _annStartProgress(rawItems.length > 1 ? ANN_DURATION : 0);
+
+  // Start loop only if multiple items
+  if(rawItems.length > 1){
+    _annTimer = setInterval(_annRotate, ANN_DURATION);
+  }
+}
+
+function _annRotate(){
+  if(_annBusy) return;
+  var body = G('annOverlayBody'); if(!body) return;
+  var items = body.querySelectorAll('.ann-slide-item');
+  var total = items.length; if(total < 2) return;
+
+  _annBusy = true;
+  var curEl = items[_annIdx];
+  var nextIdx = (_annIdx + 1) % total;
+  var nxtEl = items[nextIdx];
+
+  // 1. Prepare next item below (no transition yet)
+  nxtEl.style.transition = 'none';
+  nxtEl.style.transform  = 'translateY(100%)';
+  nxtEl.style.opacity    = '0';
+
+  requestAnimationFrame(function(){
+    requestAnimationFrame(function(){
+      // 2. Exit current upward
+      curEl.style.transition = 'transform .5s ease-in, opacity .35s ease-in';
+      curEl.style.transform  = 'translateY(-100%)';
+      curEl.style.opacity    = '0';
+
+      // 3. Slide next up into view
+      nxtEl.style.transition = 'transform .55s cubic-bezier(.22,.68,0,1.2), opacity .4s ease';
+      nxtEl.style.transform  = 'translateY(0)';
+      nxtEl.style.opacity    = '1';
+
+      _annIdx = nextIdx;
+      _annUpdateCounter(_annIdx + 1, total);
+      _annStartProgress(ANN_DURATION);
+
+      // 4. Reset exited item back to bottom (ready for when it loops around)
+      setTimeout(function(){
+        curEl.style.transition = 'none';
+        curEl.style.transform  = 'translateY(100%)';
+        curEl.style.opacity    = '0';
+        _annBusy = false;
+      }, 600);
+    });
+  });
 }
 
 function _annStartProgress(dur){
   var bar = G('annProgressBar'); if(!bar) return;
   bar.style.transition = 'none';
   bar.style.width = '0%';
-  if(!dur){ bar.style.width='100%'; return; }
+  if(!dur){ bar.style.width = '100%'; return; }
   requestAnimationFrame(function(){
     requestAnimationFrame(function(){
-      bar.style.transition = 'width '+dur+'ms linear';
+      bar.style.transition = 'width ' + dur + 'ms linear';
       bar.style.width = '100%';
     });
   });
 }
 
 function _annUpdateCounter(cur, total){
-  var dot = G('annDot');
-  if(!dot) return;
-  // Show counter text next to dot if >1 item
   var ctr = G('annCounter');
   if(total > 1){
     if(!ctr){
       ctr = document.createElement('span');
       ctr.id = 'annCounter';
-      ctr.style.cssText = 'font-family:Bebas Neue;font-size:10px;letter-spacing:1px;color:rgba(245,196,0,.6);';
-      dot.parentNode.insertBefore(ctr, dot);
+      ctr.style.cssText = 'font-family:"Bebas Neue",sans-serif;font-size:10px;letter-spacing:1px;color:rgba(245,196,0,.65);margin-right:4px;';
+      var dot = G('annDot');
+      if(dot) dot.parentNode.insertBefore(ctr, dot);
     }
-    ctr.textContent = cur + '/' + total + ' ';
-  } else if(ctr){ ctr.textContent = ''; }
-}
-
-function _annRotate(){
-  var body = G('annOverlayBody'); if(!body) return;
-  var items = body.querySelectorAll('.ann-slide-item');
-  if(!items.length) return;
-  var cur = items[_annIdx];
-  // exit current
-  cur.classList.remove('ann-active');
-  cur.classList.add('ann-exit');
-  // advance index
-  _annIdx = (_annIdx + 1) % items.length;
-  var nxt = items[_annIdx];
-  // reset next to bottom without transition, then animate in
-  nxt.style.transition = 'none';
-  nxt.style.transform = 'translateY(100%)';
-  nxt.style.opacity = '0';
-  requestAnimationFrame(function(){
-    requestAnimationFrame(function(){
-      nxt.style.transition = '';
-      nxt.classList.add('ann-active');
-      _annUpdateCounter(_annIdx + 1, items.length);
-      _annStartProgress(4500);
-    });
-  });
-  // clean exit class after transition
-  setTimeout(function(){ cur.classList.remove('ann-exit'); }, 600);
+    ctr.textContent = cur + '/' + total;
+  } else {
+    if(ctr) ctr.textContent = '';
+  }
 }
 
 function renderAnnTbl(){
