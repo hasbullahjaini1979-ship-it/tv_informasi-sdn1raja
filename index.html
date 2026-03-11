@@ -391,7 +391,10 @@ input[type=file]::-webkit-file-upload-button{background:rgba(245,196,0,.12);bord
       <div class="attl">⚙ PANEL ADMIN — SDN 1 RAJA</div>
       <div class="asub">Kelola konten tampilan TV Informasi Digital</div>
     </div>
-    <button class="bx" onclick="closeAdmin()">✕ TUTUP</button>
+    <div style="display:flex;gap:8px">
+      <button onclick="logoutAdmin()" style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.18);border-radius:5px;color:rgba(255,255,255,.55);font-family:Rajdhani,sans-serif;font-size:12px;font-weight:600;padding:5px 13px;cursor:pointer;letter-spacing:.5px">Logout</button>
+      <button class="bx" onclick="closeAdmin()">&#x2715; TUTUP</button>
+    </div>
   </div>
   <div class="trow">
     <span class="tlbl">🎨 TEMA:</span>
@@ -589,7 +592,20 @@ input[type=file]::-webkit-file-upload-button{background:rgba(245,196,0,.12);bord
           <div id="restInfo" style="display:none;margin-top:8px;padding:8px;background:rgba(20,160,70,.1);border:1px solid rgba(20,160,70,.3);border-radius:var(--rs);font-size:11px;color:#60e090"></div>
         </div>
         <div class="bcard">
-          <h3>🗑 HAPUS CACHE LOKAL</h3>
+          <h3>&#x1F510; GANTI PASSWORD ADMIN</h3>
+          <p>Password default: <strong>sdn1raja</strong>. Sesi login bertahan 30 menit.</p>
+          <div class="fr" style="margin-top:8px">
+            <label>Password Baru</label>
+            <input type="password" id="iPwNew" placeholder="Minimal 4 karakter">
+          </div>
+          <div class="fr">
+            <label>Konfirmasi Password</label>
+            <input type="password" id="iPwConf" placeholder="Ulangi password baru">
+          </div>
+          <div class="brow"><button class="btn by" onclick="changePass()">&#x1F510; SIMPAN PASSWORD</button></div>
+        </div>
+        <div class="bcard">
+          <h3>&#x1F5D1; HAPUS CACHE LOKAL</h3>
           <p>Reset semua data di browser ini ke default</p>
           <div class="brow"><button class="btn br" onclick="clearLS()">🗑 HAPUS CACHE</button></div>
         </div>
@@ -674,6 +690,7 @@ var S = {
   ],
   theme: '',
   vidUrl: '',
+  adminPass: 'sdn1raja',
   _eType:null, _eId:null
 };
 
@@ -708,17 +725,15 @@ function toast(msg,type){
 // ═══════════════════════════════════════════
 function toDirectUrl(url) {
   if (!url) return url;
-  // extract file id from share URL formats
-  var patterns = [
-    /\/file\/d\/([a-zA-Z0-9_-]+)/,
-    /id=([a-zA-Z0-9_-]+)/,
-    /open\?id=([a-zA-Z0-9_-]+)/
-  ];
-  for (var i=0; i<patterns.length; i++) {
-    var m = url.match(patterns[i]);
-    if (m) return 'https://drive.google.com/uc?export=view&id=' + m[1];
+  // Google Drive: konversi ke thumbnail URL (tidak kena CORS, tidak butuh login)
+  if (url.indexOf('drive.google.com') > -1 || url.indexOf('docs.google.com') > -1) {
+    var id = null;
+    var ma = url.match(/\/d\/([a-zA-Z0-9_-]{10,})/);
+    var mb = url.match(/[?&]id=([a-zA-Z0-9_-]{10,})/);
+    if (ma) id = ma[1]; else if (mb) id = mb[1];
+    if (id) return 'https://drive.google.com/thumbnail?id=' + id + '&sz=w1920';
   }
-  return url; // return as-is if not drive URL
+  return url;
 }
 
 // ═══════════════════════════════════════════
@@ -1087,11 +1102,38 @@ function renderSlideList(){
 // ═══════════════════════════════════════════
 //  ADMIN PANEL
 // ═══════════════════════════════════════════
+var _SESI_ADMIN = 1800000; // 30 menit
+function _cekSesi(){
+  var ok = sessionStorage.getItem('admOk');
+  var ts = parseInt(sessionStorage.getItem('admTs')||'0');
+  return ok==='1' && (Date.now()-ts < _SESI_ADMIN);
+}
 function openAdmin(){
+  if(!_cekSesi()){
+    var pw = prompt('Masukkan Password Admin (default: sdn1raja):');
+    if(pw===null) return;
+    if(pw !== (S.adminPass||'sdn1raja')){
+      alert('Password salah!');
+      return;
+    }
+    sessionStorage.setItem('admOk','1');
+    sessionStorage.setItem('admTs', String(Date.now()));
+  } else {
+    sessionStorage.setItem('admTs', String(Date.now()));
+  }
   G('admin').style.display='block';
   syncUI(); renderGuruTbl(); renderAnnTbl(); renderJamTbl(); renderSlideList();
 }
-function closeAdmin(){ G('admin').style.display='none'; }
+function closeAdmin(){
+  G('admin').style.display='none';
+  if(sessionStorage.getItem('admOk')==='1') sessionStorage.setItem('admTs',String(Date.now()));
+}
+function logoutAdmin(){
+  sessionStorage.removeItem('admOk');
+  sessionStorage.removeItem('admTs');
+  G('admin').style.display='none';
+  toast('Logout berhasil','info');
+}
 
 function showTab(btn,id){
   document.querySelectorAll('.tab').forEach(function(b){ b.classList.remove('on'); });
@@ -1482,6 +1524,7 @@ function lsSave(){
       mediaMode: S.mediaMode,
       slides: S.slides.filter(function(s){ return s.url && s.url.indexOf('http')===0; }), // hanya simpan URL, bukan base64
       slideInt: S.slideInt,
+      adminPass: S.adminPass,
       vidUrl: S.vidUrl,
       theme: S.theme
     };
@@ -1508,6 +1551,7 @@ function lsLoad(){
     if(d.mediaMode) S.mediaMode = d.mediaMode;
     if(d.slides) S.slides = d.slides;
     if(d.slideInt) S.slideInt = d.slideInt;
+    if(d.adminPass) S.adminPass = d.adminPass;
     if(d.vidUrl) S.vidUrl = d.vidUrl;
     if(d.theme !== undefined){ S.theme = d.theme; document.documentElement.setAttribute('data-theme', d.theme||''); }
     return true;
@@ -1551,6 +1595,7 @@ function gsPushBg(type){
         tickerTop:S.tkTop, tickerBottom:S.tkBot, tickerGuru:S.tkGuru,
         spTop:String(S.spTop), spBot:String(S.spBot), spGuru:String(S.spGuru),
         siswa:S.stats.siswa, guru:S.stats.guru, kelas:S.stats.kelas, ekskul:S.stats.ekskul,
+        adminPass: S.adminPass||'sdn1raja',
         mediaMode:S.mediaMode, slideInt:String(S.slideInt), theme:S.theme, vidUrl:S.vidUrl||'',
         slides: JSON.stringify(S.slides.filter(function(s){ return s.url&&s.url.indexOf('http')===0; })),
         jamPelajaran: JSON.stringify(S.jamPelajaran)
@@ -1652,6 +1697,7 @@ function syncSettings(silent){
       if(d.slides){ try{ var sl=JSON.parse(d.slides); if(sl&&sl.length){ S.slides=sl; } }catch(e){} }
       if(d.jamPelajaran){ try{ var jp=JSON.parse(d.jamPelajaran); if(jp&&jp.length){ S.jamPelajaran=jp; } }catch(e){} }
       if(d.vidUrl) S.vidUrl = d.vidUrl;
+      if(d.adminPass) S.adminPass = d.adminPass;
       applyAll();
       // Apply video jika ada
       if(S.vidUrl) applyVidSrc(S.vidUrl);
@@ -1711,6 +1757,17 @@ function doRestore(inp){
   reader.readAsText(inp.files[0]);
 }
 
+function changePass(){
+  var np=(G('iPwNew')?G('iPwNew').value:'').trim();
+  var nc=(G('iPwConf')?G('iPwConf').value:'').trim();
+  if(!np||np.length<4){ toast('Password minimal 4 karakter!','err'); return; }
+  if(np!==nc){ toast('Konfirmasi tidak cocok!','err'); return; }
+  S.adminPass=np; saveAll();
+  sessionStorage.removeItem('admOk');
+  toast('Password berhasil diubah. Silakan login ulang.','ok');
+  if(G('iPwNew')) G('iPwNew').value='';
+  if(G('iPwConf')) G('iPwConf').value='';
+}
 function clearLS(){
   if(!confirm('Hapus semua cache lokal? Halaman akan reload dan kembali ke default.')) return;
   try{ localStorage.removeItem(LS_KEY); } catch(e){}
@@ -1781,14 +1838,15 @@ window.addEventListener('load',function(){
   requestAnimationFrame(guruTkFrame);
   tick();
 
-  // 5. AUTO-SYNC dari Google Sheet setiap kali halaman dibuka / di-refresh
-  //    Data sheet selalu diutamakan (override localStorage)
+  // 5. AUTO-SYNC: saat halaman dibuka DAN setiap 1 menit otomatis
   toast('Mengambil data dari Sheet...','info');
-  setTimeout(function(){
+  function _autoSync(){
     syncGuru(true);
     setTimeout(function(){ syncAnn(true); }, 700);
     setTimeout(function(){ syncSettings(true); }, 1400);
-  }, 1500);
+  }
+  setTimeout(_autoSync, 1500);
+  setInterval(_autoSync, 60000); // sync tiap 1 menit
 });
 
 </script>
