@@ -1112,8 +1112,10 @@ function openAdmin(){
   if(!_cekSesi()){
     var pw = prompt('Masukkan Password Admin (default: sdn1raja):');
     if(pw===null) return;
-    if(pw !== (S.adminPass||'sdn1raja')){
-      alert('Password salah!');
+    // Trim spasi & bandingkan case-sensitive
+    var storedPw = (S.adminPass && S.adminPass.trim()) ? S.adminPass.trim() : 'sdn1raja';
+    if(pw.trim() !== storedPw){
+      alert('Password salah! (Hint: default adalah sdn1raja)');
       return;
     }
     sessionStorage.setItem('admOk','1');
